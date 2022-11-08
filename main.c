@@ -3,6 +3,7 @@
 int main()
 {
     int decision = 0;
+    int x;
 
     while (decision != 3)
     {
