@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <process.h>
 #include <stdatomic.h>
+#include <string.h>
+#include <stdlib.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -20,3 +22,4 @@
 void socketServidor();
 DWORD WINAPI sendThreadFunc(LPVOID lpParam);
 void socketCliente();
+void leer_mensaje(FILE *, char[]) ;

@@ -404,3 +404,87 @@ void socketCliente()
 
     // ===============================================
 }
+
+void leer_mensaje(FILE *registro, char mensaje[]){
+    char delimitador[] = "[];#";
+    char *token = strtok(mensaje, delimitador);
+    int j=0;
+    char *aux;
+    char salto='\n';
+    if(token != NULL){
+        while(token != NULL){
+            ////// 
+            /*
+            Separamos el mensaje de acuerdo al valor de j
+            */
+            if (j==0)
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro,"#####Mensaje-id:%s\n",token);
+            }
+            else if (j==1)
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro,"Mensaje-origen:%s. ",token);
+            }else if (j==2)
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro,"Mensaje-destino:%s.\n",token);
+            }else if (j==3)
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro,"Evento:%s. ",token);
+            }else if (j==4)
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro,"Estado-juego:%s.\n",token);
+            }else if (j==5)
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro,"**********Turno-jugada:Jugador-%s. ",token);
+            }else if (j==6)
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro,"Numero-jugada:%s.**********\n",token);
+            
+            }else if (j==7) //posicion en x
+            {
+                aux=token;
+            }else if (j==8) //posicion en y
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro,"Casilla-jugada:(%s,%s).\n",aux,token);
+
+            }else if (j==9)     // TABLERO!!!!!!!!
+            {
+                int cont=0, //contador que hace los saltos de linea
+                    k=0;    //contador de caracteres dentro del tablero
+                printf("Token: %s\n", token);
+                /// guardamos el tablero en el archivo con el formato deseado
+                while (k<strlen(token)) //mientas no leamos todo el tablero
+                {
+                    if (cont==10)
+                    {
+                        fputc(salto,registro);
+                        cont=0;
+                    }
+                    if (cont==9)
+                    {                     
+                        fputc(token[k],registro);
+                    }
+                    else
+                    {
+                        fputc(token[k],registro);
+                        fputc(token[k+1],registro);
+                    }
+                    k=k+2;
+                    cont++;                
+                }  
+                
+            }
+            // Sólo en la primera pasamos la cadena; en las siguientes pasamos NULL
+            token = strtok(NULL, delimitador);
+            j++;
+        }
+    }
+}
