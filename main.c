@@ -7,6 +7,7 @@ int main()
     int modoVisita = 0;
     char modoActivo[100];
     char direccion[1000];
+    char numJugador[100];
     FILE *registro;
     // printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
     // scanf("%s", direccion);
@@ -17,17 +18,20 @@ int main()
         if (modoLocal && !modoVisita)
         {
             strcpy(modoActivo, "Modo Local");
+            strcpy(numJugador, "1");
         }
         else if (!modoLocal && modoVisita)
         {
             strcpy(modoActivo, "Modo Visita");
+            strcpy(numJugador, "2");
         }
         else
         {
             strcpy(modoActivo, "No configurado");
+            strcpy(numJugador, "No configurado");
         }
 
-        printf("\nID Grupo: 7            Jugador: No configurado\n");
+        printf("\nID Grupo: 7            Jugador: %s\n", numJugador);
         printf("\nModo activado: %s\n\n", modoActivo);
         printf("MENU DEL PROGRAMA\n\n");
         printf("Opciones de navegacion:\n");
