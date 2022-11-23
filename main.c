@@ -44,6 +44,18 @@ int main()
 
         if (decisionMenu == 1) // empezar partida
         {
+            if (strcmp(modoActivo, "Modo Local") == 0)
+            {
+                socketServidor();
+            }
+            else if (strcmp(modoActivo, "Modo Visita") == 0)
+            {
+                socketCliente();
+            }
+            else
+            {
+                printf("Debe configurar un modo para empezar la partida\n");
+            }
         }
         else if (decisionMenu == 2) // configurar parametros
         {
