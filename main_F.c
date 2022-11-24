@@ -4,37 +4,29 @@ int running = 0;
 
 void socketServidor()
 {
-    printf("Hello, world!\n");
+    printf("Hello world\n");
 
     int res, sendRes;
 
-    // INITIALIZATION ===========================
+    // INITIALIZATION ==============================
     WSADATA wsaData; // configuration data
     res = WSAStartup(MAKEWORD(2, 2), &wsaData);
+
     if (res)
     {
         printf("Startup failed: %d\n", res);
     }
-    // ==========================================
+    //==============================================
 
-    // SETUP SERVER =============================
+    // SETUP SERVER =================================
 
-    // construct socket
+    // constructor socket
     SOCKET listener;
     listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
     if (listener == INVALID_SOCKET)
     {
         printf("Error with construction: %d\n", WSAGetLastError());
-        WSACleanup();
-    }
-
-    // setup for multiple connections
-    char multiple = !0;
-    res = setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &multiple, sizeof(multiple));
-    if (res < 0)
-    {
-        printf("Multiple client setup failed: %d\n", WSAGetLastError());
-        closesocket(listener);
         WSACleanup();
     }
 
@@ -44,6 +36,7 @@ void socketServidor()
     address.sin_addr.s_addr = inet_addr(ADDRESS);
     address.sin_port = htons(PORT);
     res = bind(listener, (struct sockaddr *)&address, sizeof(address));
+
     if (res == SOCKET_ERROR)
     {
         printf("Bind failed: %d\n", WSAGetLastError());
@@ -59,193 +52,89 @@ void socketServidor()
         closesocket(listener);
         WSACleanup();
     }
-    // ==========================================
+    //==============================================
 
     printf("Accepting on %s:%d\n", ADDRESS, PORT);
 
-    // MAIN LOOP ================================
+    // HANDLE A CLIENT =============================
 
-    // variables
-    fd_set socketSet;            // set of active clients
-    SOCKET clients[MAX_CLIENTS]; // array of clients
-    int curNoClients = 0;        // active slots in the array
-    SOCKET sd, max_sd;           // placeholders
+    // accept client socket
+    SOCKET client;
     struct sockaddr_in clientAddr;
     int clientAddrlen;
-    char running = !0; // server state
+    client = accept(listener, NULL, NULL);
+    if (client == INVALID_SOCKET)
+    {
+        printf("Could not accept: %d\n", WSAGetLastError());
+        closesocket(listener);
+        WSACleanup();
+    }
 
+    // get client information
+    getpeername(client, (struct sockaddr *)&clientAddr, (socklen_t *)&clientAddr);
+    printf("Client connected at %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+
+    // send welcome message
+    char *welcome = "Welcome to the server :)";
+    sendRes = send(client, welcome, strlen(welcome), 0);
+    if (sendRes != strlen(welcome))
+    {
+        printf("Error sending %d\n", WSAGetLastError());
+        shutdown(client, SD_BOTH);
+        closesocket(client);
+    }
+
+    // receive messages
     char recvbuf[BUFLEN];
 
-    char *welcome = "Welcome to the server :)\n";
-    int welcomeLength = strlen(welcome);
-    char *full = "Sorry, the server is full :(\n";
-    int fullLength = strlen(full);
-    char *goodbye = "Goodnight.\n";
-    int goodbyeLength = strlen(goodbye);
-
-    // clear client array
-    memset(clients, 0, MAX_CLIENTS * sizeof(SOCKET));
-
-    while (running)
+    do
     {
-        // clear the set
-        FD_ZERO(&socketSet);
-
-        // add listener socket
-        FD_SET(listener, &socketSet);
-
-        for (int i = 0; i < MAX_CLIENTS; i++)
+        res = recv(client, recvbuf, BUFLEN, 0);
+        if (res > 0)
         {
-            // socket
-            sd = clients[i];
+            recvbuf[res] = '\0';
+            printf("Message received (%d): %s\n", res, recvbuf);
 
-            if (sd > 0)
+            if (!memcmp(recvbuf, "/quit", 5 * sizeof(char)))
             {
-                // add an active client to the set
-                FD_SET(sd, &socketSet);
+                // received quit command
+                printf("Closing connection.\n");
+                break;
             }
 
-            if (sd > max_sd)
+            // echo message back
+            sendRes = send(client, recvbuf, res, 0);
+            if (sendRes != res)
             {
-                max_sd = sd;
+                printf("Error sending %d\n", WSAGetLastError());
+                shutdown(client, SD_BOTH);
+                closesocket(client);
+                break;
             }
         }
-
-        int activity = select(max_sd + 1, &socketSet, NULL, NULL, NULL);
-        if (activity < 0)
+        else if (!res)
         {
-            continue;
+            // client disconnected
+            printf("Closing connection.\n");
+            break;
         }
-
-        // determine if listener has activity
-        if (FD_ISSET(listener, &socketSet))
+        else
         {
-            // accept connection
-            sd = accept(listener, NULL, NULL);
-            if (sd == INVALID_SOCKET)
-            {
-                printf("Error accepting: %d\n", WSAGetLastError());
-            }
-
-            // get client information
-            getpeername(sd, (struct sockaddr *)&clientAddr, &clientAddrlen);
-            printf("Client connected at %s:%d\n",
-                   inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-
-            // add to array
-            if (curNoClients >= MAX_CLIENTS)
-            {
-                printf("Full\n");
-
-                // send overflow message
-                sendRes = send(sd, full, fullLength, 0);
-                if (sendRes != fullLength)
-                {
-                    printf("Error sending: %d\n", WSAGetLastError());
-                }
-
-                shutdown(sd, SD_BOTH);
-                closesocket(sd);
-            }
-            else
-            {
-                // scan through list
-                int i;
-                for (i = 0; i < MAX_CLIENTS; i++)
-                {
-                    if (!clients[i])
-                    {
-                        clients[i] = sd;
-                        printf("Added to the list at index %d\n", i);
-                        curNoClients++;
-                        break;
-                    }
-                }
-
-                // send welcome
-                sendRes = send(sd, welcome, welcomeLength, 0);
-                if (sendRes != welcomeLength)
-                {
-                    printf("Error sending: %d\n", WSAGetLastError());
-                    shutdown(sd, SD_BOTH);
-                    closesocket(sd);
-                    clients[i] = 0;
-                    curNoClients--;
-                }
-            }
+            printf("Receive failed: %d\n", WSAGetLastError());
+            break;
         }
+    } while (res > 0);
 
-        // iterate through clients
-        for (int i = 0; i < MAX_CLIENTS; i++)
-        {
-            if (!clients[i])
-            {
-                continue;
-            }
-
-            sd = clients[i];
-            // determine if client has activity
-            if (FD_ISSET(sd, &socketSet))
-            {
-                // get message
-                res = recv(sd, recvbuf, BUFLEN, 0);
-                if (res > 0)
-                {
-                    // print message
-                    recvbuf[res] = '\0';
-                    printf("Mensaje recibido (%d): %s\n", res, recvbuf);
-
-                    // test if quit command
-                    if (!memcmp(recvbuf, "/quit", 5 * sizeof(char)))
-                    {
-                        running = 0; // false
-                        break;
-                    }
-
-                    // echo message
-                    /*sendRes = send(sd, recvbuf, res, 0);
-                    if (sendRes == SOCKET_ERROR)
-                    {
-                        printf("Echo failed: %d\n", WSAGetLastError());
-                        shutdown(sd, SD_BOTH);
-                        closesocket(sd);
-                        clients[i] = 0;
-                        curNoClients--;
-                    }*/
-                }
-                else
-                {
-                    // close message
-                    getpeername(sd, (struct sockaddr *)&clientAddr, &clientAddrlen);
-                    printf("Client disconnected at %s:%d\n",
-                           inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-
-                    shutdown(sd, SD_BOTH);
-                    closesocket(sd);
-                    clients[i] = 0;
-                    curNoClients--;
-                }
-            }
-        }
-    }
-
-    // ==========================================
-
-    // CLEANUP ==================================
-
-    // disconnect all clients
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    // shutdown client
+    res = shutdown(client, SD_BOTH);
+    if (res == SOCKET_ERROR)
     {
-        if (clients[i] > 0)
-        {
-            // active client
-            sendRes = send(clients[i], goodbye, goodbyeLength, 0);
-
-            shutdown(clients[i], SD_BOTH);
-            closesocket(clients[i]);
-            clients[i] = 0;
-        }
+        printf("Client shutdown failed: %d\n", WSAGetLastError());
     }
+    closesocket(client);
+    // =============================================
+
+    // CLEANUP =====================================
 
     // shut down server socket
     closesocket(listener);
@@ -256,9 +145,9 @@ void socketServidor()
     {
         printf("Cleanup failed: %d\n", res);
     }
-    // ==========================================
+    //==============================================
 
-    printf("Shutting down.\nGood night.\n");
+    printf("Shutting down. \nGood night.\n");
 }
 
 DWORD WINAPI sendThreadFunc(LPVOID lpParam)
@@ -405,82 +294,90 @@ void socketCliente()
     // ===============================================
 }
 
-void leer_mensaje(FILE *registro, char mensaje[]){
+void leer_mensaje(FILE *registro, char mensaje[])
+{
     char delimitador[] = "[];#";
     char *token = strtok(mensaje, delimitador);
-    int j=0;
+    int j = 0;
     char *aux;
-    char salto='\n';
-    if(token != NULL){
-        while(token != NULL){
-            ////// 
+    char salto = '\n';
+    if (token != NULL)
+    {
+        while (token != NULL)
+        {
+            //////
             /*
             Separamos el mensaje de acuerdo al valor de j
             */
-            if (j==0)
+            if (j == 0)
             {
                 printf("Token: %s\n", token);
-                fprintf(registro,"#####Mensaje-id:%s\n",token);
+                fprintf(registro, "#####Mensaje-id:%s\n", token);
             }
-            else if (j==1)
+            else if (j == 1)
             {
                 printf("Token: %s\n", token);
-                fprintf(registro,"Mensaje-origen:%s. ",token);
-            }else if (j==2)
+                fprintf(registro, "Mensaje-origen:%s. ", token);
+            }
+            else if (j == 2)
             {
                 printf("Token: %s\n", token);
-                fprintf(registro,"Mensaje-destino:%s.\n",token);
-            }else if (j==3)
+                fprintf(registro, "Mensaje-destino:%s.\n", token);
+            }
+            else if (j == 3)
             {
                 printf("Token: %s\n", token);
-                fprintf(registro,"Evento:%s. ",token);
-            }else if (j==4)
+                fprintf(registro, "Evento:%s. ", token);
+            }
+            else if (j == 4)
             {
                 printf("Token: %s\n", token);
-                fprintf(registro,"Estado-juego:%s.\n",token);
-            }else if (j==5)
+                fprintf(registro, "Estado-juego:%s.\n", token);
+            }
+            else if (j == 5)
             {
                 printf("Token: %s\n", token);
-                fprintf(registro,"**********Turno-jugada:Jugador-%s. ",token);
-            }else if (j==6)
+                fprintf(registro, "**********Turno-jugada:Jugador-%s. ", token);
+            }
+            else if (j == 6)
             {
                 printf("Token: %s\n", token);
-                fprintf(registro,"Numero-jugada:%s.**********\n",token);
-            
-            }else if (j==7) //posicion en x
+                fprintf(registro, "Numero-jugada:%s.**********\n", token);
+            }
+            else if (j == 7) // posicion en x
             {
-                aux=token;
-            }else if (j==8) //posicion en y
+                aux = token;
+            }
+            else if (j == 8) // posicion en y
             {
                 printf("Token: %s\n", token);
-                fprintf(registro,"Casilla-jugada:(%s,%s).\n",aux,token);
-
-            }else if (j==9)     // TABLERO!!!!!!!!
+                fprintf(registro, "Casilla-jugada:(%s,%s).\n", aux, token);
+            }
+            else if (j == 9) // TABLERO!!!!!!!!
             {
-                int cont=0, //contador que hace los saltos de linea
-                    k=0;    //contador de caracteres dentro del tablero
+                int cont = 0, // contador que hace los saltos de linea
+                    k = 0;    // contador de caracteres dentro del tablero
                 printf("Token: %s\n", token);
                 /// guardamos el tablero en el archivo con el formato deseado
-                while (k<strlen(token)) //mientas no leamos todo el tablero
+                while (k < strlen(token)) // mientas no leamos todo el tablero
                 {
-                    if (cont==10)
+                    if (cont == 10)
                     {
-                        fputc(salto,registro);
-                        cont=0;
+                        fputc(salto, registro);
+                        cont = 0;
                     }
-                    if (cont==9)
-                    {                     
-                        fputc(token[k],registro);
+                    if (cont == 9)
+                    {
+                        fputc(token[k], registro);
                     }
                     else
                     {
-                        fputc(token[k],registro);
-                        fputc(token[k+1],registro);
+                        fputc(token[k], registro);
+                        fputc(token[k + 1], registro);
                     }
-                    k=k+2;
-                    cont++;                
-                }  
-                
+                    k = k + 2;
+                    cont++;
+                }
             }
             // Sólo en la primera pasamos la cadena; en las siguientes pasamos NULL
             token = strtok(NULL, delimitador);
