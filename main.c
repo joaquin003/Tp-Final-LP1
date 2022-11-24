@@ -9,6 +9,7 @@ int main()
     char direccion[1000];
     char numJugador[100];
     FILE *registro;
+    SOCKET recibe;  
     // printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
     // scanf("%s", direccion);
     // registro = fopen(direccion, "w"); // guarda el archivo en la direccion y con el nombre que el usuario desea
@@ -30,7 +31,7 @@ int main()
             strcpy(modoActivo, "No configurado");
             strcpy(numJugador, "No configurado");
         }
-
+        system("cls");
         printf("\nID Grupo: 7            Jugador: %s\n", numJugador);
         printf("\nModo activado: %s\n\n", modoActivo);
         printf("MENU DEL PROGRAMA\n\n");
@@ -47,6 +48,7 @@ int main()
             if (strcmp(modoActivo, "Modo Local") == 0)
             {
                 socketServidor();
+
             }
             else if (strcmp(modoActivo, "Modo Visita") == 0)
             {
@@ -59,10 +61,12 @@ int main()
         }
         else if (decisionMenu == 2) // configurar parametros
         {
+            
             int decisionParametros = 0;
 
             while (decisionParametros != 4)
             {
+                system("cls");
                 printf("\nCONFIGURAR PARAMETROS\n\n");
                 printf("Opciones de navegacion:\n");
                 printf("1- Modo Local\n");
@@ -73,20 +77,32 @@ int main()
 
                 if (decisionParametros == 1) // modo local
                 {
-                    printf("Cambiando a modo local...\n");
+                    printf("\nCambiando a modo local...\n\n\n");
                     modoLocal = 1;
                     modoVisita = 0;
+                    system("pause");
                 }
                 else if (decisionParametros == 2) // modo visita
                 {
-                    printf("Cambiando a modo visita...\n");
+                    printf("\nCambiando a modo visita...\n\n\n");
                     modoVisita = 1;
                     modoLocal = 0;
+                    system("pause");
                 }
                 else if (decisionParametros == 3) // directorio de archivos
                 {
-                    printf("Ingrese el directorio de archivos de salida: ");
+                    printf("\n\nIngrese el directorio de archivos de salida: ");
                     scanf("%s", direccion);
+                    registro=fopen(direccion,"w");
+                    /* validacion de la direccion del archivo*/
+                    while (registro==NULL)
+                    {
+                        printf ( "\nError!!!! Por favor ingrese una carpeta y archivo de texto existente\n ");
+                        printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
+                        scanf("%s",direccion);
+                        registro=fopen(direccion,"w");
+                    }
+                    system("pause");
                 }
                 else if (decisionParametros == 4) // ir atras
                 {
@@ -100,16 +116,18 @@ int main()
         }
         else if (decisionMenu == 3) // autores
         {
+            system("cls");
             printf("\nLos autores del programa son: \n");
             printf("Joaquin Manuel Uliambre Frutos\n");
-            printf("Zinri Alice Bobabilla Peralta\n");
+            printf("Zinri Alice Bobabilla Peralta\n\n");
+            system("pause");
         }
         else if (decisionMenu == 4) // ayuda
         {
         }
         else if (decisionMenu == 5) // salir
         {
-            printf("Saliendo del programa...");
+            printf("\n\n\nSaliendo del programa...");
         }
         else
         {
