@@ -2,7 +2,7 @@
 
 int running = 0;
 
-void socketServidor()
+void socketServidor(FILE *registro)
 {
     printf("Hello world\n");
 
@@ -103,6 +103,7 @@ void socketServidor()
             }
 
             // echo message back
+            leer_mensaje(registro, recvbuf);
             sendRes = send(client, recvbuf, res, 0);
             if (sendRes != res)
             {
@@ -182,7 +183,23 @@ DWORD WINAPI sendThreadFunc(LPVOID lpParam)
     }
 }
 
-void socketCliente()
+DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN])
+{
+    SOCKET client = *(SOCKET *)lpParam;
+
+    char sendbuf[BUFLEN];
+    int sendbuflen, res;
+
+    sendbuflen = strlen(mensaje);
+    res = send(client, mensaje, sendbuflen, 0);
+
+    if (res != sendbuflen)
+    {
+        printf("Send failed.\n");
+    }
+}
+
+void socketCliente(FILE *registro)
 {
     printf("Hello World\n");
 
@@ -255,6 +272,7 @@ void socketCliente()
         if (res > 0)
         {
             printf("Mensaje recibido (%d): %s\n", res, recvbuf);
+            enviarMensaje(&client, "1;15:00:05;*;cliente;2;*;conectar;pendiente;*;*;*;*;*;#.");
         }
         else if (!res)
         {
