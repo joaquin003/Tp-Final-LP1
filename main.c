@@ -9,13 +9,14 @@ int main()
     char direccion[1000];
     char numJugador[100];
     FILE *registro;
-    SOCKET recibe;  
+    SOCKET recibe;
     // printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
     // scanf("%s", direccion);
     // registro = fopen(direccion, "w"); // guarda el archivo en la direccion y con el nombre que el usuario desea
 
     while (decisionMenu != 5)
     {
+        registro = fopen(direccion, "w");
         if (modoLocal && !modoVisita)
         {
             strcpy(modoActivo, "Modo Local");
@@ -31,7 +32,6 @@ int main()
             strcpy(modoActivo, "No configurado");
             strcpy(numJugador, "No configurado");
         }
-        system("cls");
         printf("\nID Grupo: 7            Jugador: %s\n", numJugador);
         printf("\nModo activado: %s\n\n", modoActivo);
         printf("MENU DEL PROGRAMA\n\n");
@@ -45,28 +45,25 @@ int main()
 
         if (decisionMenu == 1) // empezar partida
         {
-            if (strcmp(modoActivo, "Modo Local") == 0)
+            if (strcmp(modoActivo, "Modo Local") == 0 && registro != NULL)
             {
                 socketServidor();
-
             }
-            else if (strcmp(modoActivo, "Modo Visita") == 0)
+            else if (strcmp(modoActivo, "Modo Visita") == 0 && registro != NULL)
             {
                 socketCliente();
             }
             else
             {
-                printf("Debe configurar un modo para empezar la partida\n");
+                printf("\nAsegurese de  configurar el modo y la ruta del archivo para comenzar la partida\n");
             }
         }
         else if (decisionMenu == 2) // configurar parametros
         {
-            
             int decisionParametros = 0;
 
             while (decisionParametros != 4)
             {
-                system("cls");
                 printf("\nCONFIGURAR PARAMETROS\n\n");
                 printf("Opciones de navegacion:\n");
                 printf("1- Modo Local\n");
@@ -80,29 +77,28 @@ int main()
                     printf("\nCambiando a modo local...\n\n\n");
                     modoLocal = 1;
                     modoVisita = 0;
-                    system("pause");
                 }
                 else if (decisionParametros == 2) // modo visita
                 {
                     printf("\nCambiando a modo visita...\n\n\n");
                     modoVisita = 1;
                     modoLocal = 0;
-                    system("pause");
                 }
                 else if (decisionParametros == 3) // directorio de archivos
                 {
-                    printf("\n\nIngrese el directorio de archivos de salida: ");
+                    printf("Para ingresar la ruta, el nombre del directorio no debe contener espacios\n");
+                    printf("\nIngrese el directorio de archivos de salida: ");
                     scanf("%s", direccion);
-                    registro=fopen(direccion,"w");
+                    printf("\nLa direccion ingresada es: %s\n", direccion);
+                    registro = fopen(direccion, "w");
                     /* validacion de la direccion del archivo*/
-                    while (registro==NULL)
+                    while (registro == NULL)
                     {
-                        printf ( "\nError!!!! Por favor ingrese una carpeta y archivo de texto existente\n ");
+                        printf("\nError!!!! Por favor ingrese una carpeta y archivo de texto existente\n ");
                         printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
-                        scanf("%s",direccion);
-                        registro=fopen(direccion,"w");
+                        scanf("%s", direccion);
+                        registro = fopen(direccion, "w");
                     }
-                    system("pause");
                 }
                 else if (decisionParametros == 4) // ir atras
                 {
@@ -135,6 +131,6 @@ int main()
         }
     }
 
-    // fclose(registro);
+    fclose(registro);
     return 0;
 }
