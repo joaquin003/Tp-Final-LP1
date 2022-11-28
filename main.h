@@ -22,5 +22,5 @@
 void socketServidor();
 DWORD WINAPI sendThreadFunc(LPVOID lpParam);
 void socketCliente();
-void leer_mensaje(FILE *, char[]);
+void leer_mensaje(FILE *, char mensaje[], char *respuesta);
 DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN]);

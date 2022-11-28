@@ -103,7 +103,8 @@ void socketServidor(FILE *registro)
             }
 
             // echo message back
-            leer_mensaje(registro, recvbuf);
+            char respuesta[1000];
+            leer_mensaje(registro, recvbuf, respuesta);
             sendRes = send(client, recvbuf, res, 0);
             if (sendRes != res)
             {
@@ -312,7 +313,7 @@ void socketCliente(FILE *registro)
     // ===============================================
 }
 
-void leer_mensaje(FILE *registro, char mensaje[])
+void leer_mensaje(FILE *registro, char mensaje[], char *respuesta)
 {
     char delimitador[] = "[];#";
     char *token = strtok(mensaje, delimitador);
@@ -327,51 +328,67 @@ void leer_mensaje(FILE *registro, char mensaje[])
             /*
             Separamos el mensaje de acuerdo al valor de j
             */
-            if (j == 0)
+            if (j == 0) // id mensaje
             {
                 printf("Token: %s\n", token);
+                // agregamos el valor al archivo
                 fprintf(registro, "#####Mensaje-id:%s\n", token);
+
+                // cambiamos el valor para concatenar al mensaje de respuesta
+                int x = atoi(token);
+                char nuevoId[20];
+                itoa(x + 1, nuevoId, 10); // convertimos el nuevo id a string
+                strcat(respuesta, strcat(nuevoId, ";"));
             }
-            else if (j == 1)
+            else if (j == 1) // marca temporal
+            {
+            }
+            else if (j == 2) // duracion
+            {
+            }
+            else if (j == 3) // programa
+            {
+            }
+            else if (j == 4) // origen
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Mensaje-origen:%s. ", token);
             }
-            else if (j == 2)
+            else if (j == 5) // destino
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Mensaje-destino:%s.\n", token);
             }
-            else if (j == 3)
+            else if (j == 6) // evento
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Evento:%s. ", token);
             }
-            else if (j == 4)
+            else if (j == 7) // estado
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Estado-juego:%s.\n", token);
             }
-            else if (j == 5)
-            {
-                printf("Token: %s\n", token);
-                fprintf(registro, "**********Turno-jugada:Jugador-%s. ", token);
-            }
-            else if (j == 6)
+            else if (j == 8) // jugada
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Numero-jugada:%s.**********\n", token);
             }
-            else if (j == 7) // posicion en x
+            else if (j == 9) // turno
+            {
+                printf("Token: %s\n", token);
+                fprintf(registro, "**********Turno-jugada:Jugador-%s. ", token);
+            }
+            else if (j == 10) // posicion en x
             {
                 aux = token;
             }
-            else if (j == 8) // posicion en y
+            else if (j == 11) // posicion en y
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Casilla-jugada:(%s,%s).\n", aux, token);
             }
-            else if (j == 9) // TABLERO!!!!!!!!
+            else if (j == 12) // TABLERO!!!!!!!!
             {
                 int cont = 0, // contador que hace los saltos de linea
                     k = 0;    // contador de caracteres dentro del tablero
