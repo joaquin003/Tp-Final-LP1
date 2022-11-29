@@ -47,11 +47,11 @@ int main()
         {
             if (strcmp(modoActivo, "Modo Local") == 0 && registro != NULL)
             {
-                socketServidor(registro);
+                socketServidor(registro, modoLocal);
             }
             else if (strcmp(modoActivo, "Modo Visita") == 0 && registro != NULL)
             {
-                socketCliente(registro);
+                socketCliente(registro, modoLocal);
             }
             else
             {

@@ -2,7 +2,7 @@
 
 int running = 0;
 
-void socketServidor(FILE *registro)
+void socketServidor(FILE *registro, int modoLocal)
 {
     printf("Hello world\n");
 
@@ -75,7 +75,7 @@ void socketServidor(FILE *registro)
     printf("Client connected at %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
     // send welcome message
-    char *welcome = "Welcome to the server :)";
+    char *welcome = "Bienvenido al servidor!";
     sendRes = send(client, welcome, strlen(welcome), 0);
     if (sendRes != strlen(welcome))
     {
@@ -104,8 +104,8 @@ void socketServidor(FILE *registro)
 
             // echo message back
             char respuesta[1000];
-            leer_mensaje(registro, recvbuf, respuesta);
-            sendRes = send(client, recvbuf, res, 0);
+            leer_mensaje(registro, recvbuf, respuesta, modoLocal);
+            sendRes = send(client, respuesta, res, 0);
             if (sendRes != res)
             {
                 printf("Error sending %d\n", WSAGetLastError());
@@ -200,7 +200,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN])
     }
 }
 
-void socketCliente(FILE *registro)
+void socketCliente(FILE *registro, int modoLocal)
 {
     printf("Hello World\n");
 
@@ -273,7 +273,24 @@ void socketCliente(FILE *registro)
         if (res > 0)
         {
             printf("Mensaje recibido (%d): %s\n", res, recvbuf);
-            enviarMensaje(&client, "1;15:00:05;*;cliente;2;*;conectar;pendiente;*;*;*;*;*;#.");
+            if (strcmp(recvbuf, "Bienvenido al servidor!") == 0)
+            {
+                char mensaje[1000] = "";
+                strcat(mensaje, "1;");
+                // hora en que vamos a enviar el mensaje
+                time_t t;
+                struct tm *tm;
+                char hora[100];
+
+                t = time(NULL);
+                tm = localtime(&t);
+                strftime(hora, 100, "%H:%M:%S", tm);
+
+                strcat(hora, ";");
+                strcat(mensaje, hora);
+                strcat(mensaje, "*;cliente;2;*;conectar;pendiente;*;*;*;*;*;#.");
+                enviarMensaje(&client, mensaje);
+            }
         }
         else if (!res)
         {
@@ -313,13 +330,43 @@ void socketCliente(FILE *registro)
     // ===============================================
 }
 
-void leer_mensaje(FILE *registro, char mensaje[], char *respuesta)
+int marcaServidor(char *tiempo)
 {
+    int tiempoSegundos = 0;
+    int h, m, s;
+    sscanf(tiempo, "%d:%d:%d", &h, &m, &s);
+    tiempoSegundos = (h * 3600) + (m * 60) + s;
+    return tiempoSegundos;
+}
+
+void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal)
+{
+    // limpiamos la respuesta antes de concatenarle nuevos valores
+    memset(respuesta, '\0', strlen(respuesta));
+
     char delimitador[] = "[];#";
     char *token = strtok(mensaje, delimitador);
     int j = 0;
     char *aux;
     char salto = '\n';
+
+    // datos del mensaje
+    int tiempoRecibido = 0;
+
+    // datos para el nuevo mensaje
+    char nuevoId[20];
+    char duracion[20];
+    char programa[20];
+
+    if (modoLocal)
+    {
+        strcpy(programa, "servidor;");
+    }
+    else
+    {
+        strcpy(programa, "cliente;");
+    }
+
     if (token != NULL)
     {
         while (token != NULL)
@@ -336,18 +383,21 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta)
 
                 // cambiamos el valor para concatenar al mensaje de respuesta
                 int x = atoi(token);
-                char nuevoId[20];
                 itoa(x + 1, nuevoId, 10); // convertimos el nuevo id a string
-                strcat(respuesta, strcat(nuevoId, ";"));
+                strcat(nuevoId, ";");     // agregamos ; al atributoId
             }
             else if (j == 1) // marca temporal
             {
+                printf("Token: %s\n", token);
+                tiempoRecibido = marcaServidor(token);
             }
             else if (j == 2) // duracion
             {
+                printf("Token: %s\n", token);
             }
             else if (j == 3) // programa
             {
+                printf("Token: %s\n", token);
             }
             else if (j == 4) // origen
             {
@@ -419,4 +469,26 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta)
             j++;
         }
     }
+
+    // hora en que vamos a enviar el mensaje
+    time_t t;
+    struct tm *tm;
+    char hora[100];
+
+    t = time(NULL);
+    tm = localtime(&t);
+    strftime(hora, 100, "%H:%M:%S", tm);
+
+    int tiempoEnviar = marcaServidor(hora);
+    int duracionSegundos = tiempoEnviar - tiempoRecibido;
+
+    itoa(duracionSegundos, duracion, 10);
+    strcat(duracion, ";");
+    strcat(hora, ";");
+
+    // concatenamos todos los nuevos datos a respuesta
+    strcat(respuesta, nuevoId);
+    strcat(respuesta, hora);
+    strcat(respuesta, duracion);
+    strcat(respuesta, programa);
 }

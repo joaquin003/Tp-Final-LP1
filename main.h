@@ -11,6 +11,7 @@
 #include <stdatomic.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -19,8 +20,9 @@
 #define ADDRESS "127.0.0.1" // aka "localhost"
 #define MAX_CLIENTS 1
 
-void socketServidor();
+void socketServidor(FILE *registro, int modoLocal);
 DWORD WINAPI sendThreadFunc(LPVOID lpParam);
-void socketCliente();
-void leer_mensaje(FILE *, char mensaje[], char *respuesta);
+void socketCliente(FILE *registro, int modoLocal);
+void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal);
 DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN]);
+int marcaServidor(char *tiempo);
