@@ -291,6 +291,12 @@ void socketCliente(FILE *registro, int modoLocal)
                 strcat(mensaje, "*;cliente;2;*;conectar;pendiente;*;*;*;*;*;#.");
                 enviarMensaje(&client, mensaje);
             }
+            else
+            {
+                char respuesta[1000];
+                leer_mensaje(registro, recvbuf, respuesta, modoLocal);
+                enviarMensaje(&client, respuesta);
+            }
         }
         else if (!res)
         {
@@ -352,19 +358,40 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
 
     // datos del mensaje
     int tiempoRecibido = 0;
+    char eventoRecibido[20];
+    char origenRecibido[20];
+    char estadoRecibido[20];
+    char jugadaRecibido[20];
+    char turnoRecibido[20];
+    char xRecibido[20];
+    char yRecibido[20];
+    char tableroRecibido[20];
 
     // datos para el nuevo mensaje
     char nuevoId[20];
     char duracion[20];
     char programa[20];
+    char eventoEnviar[20];
+    char origenEnviar[20];
+    char destinoEnviar[20];
+    char estadoEnviar[20];
+    char jugadaEnviar[20];
+    char turnoEnviar[20];
+    char xEnviar[20];
+    char yEnviar[20];
+    char tableroEnviar[20];
 
     if (modoLocal)
     {
         strcpy(programa, "servidor;");
+        strcpy(origenEnviar, "1;");
+        strcpy(destinoEnviar, "2;");
     }
     else
     {
         strcpy(programa, "cliente;");
+        strcpy(origenEnviar, "2;");
+        strcpy(destinoEnviar, "1;");
     }
 
     if (token != NULL)
@@ -413,11 +440,15 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Evento:%s. ", token);
+
+                strcpy(eventoRecibido, token);
             }
             else if (j == 7) // estado
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Estado-juego:%s.\n", token);
+
+                strcpy(estadoRecibido, token);
             }
             else if (j == 8) // jugada
             {
@@ -486,9 +517,40 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     strcat(duracion, ";");
     strcat(hora, ";");
 
+    if (strcmp(eventoRecibido, "conectar") == 0)
+    {
+        strcpy(eventoEnviar, "iniciar;");
+        strcpy(estadoEnviar, "conectado;");
+        strcpy(jugadaEnviar, "*;");
+        strcpy(turnoEnviar, "*;");
+        strcpy(xEnviar, "*;");
+        strcpy(yEnviar, "*;");
+        strcpy(tableroEnviar, "*;");
+    }
+    else if (strcmp(eventoRecibido, "iniciar") == 0)
+    {
+        strcpy(eventoEnviar, "empezar;");
+        strcpy(estadoEnviar, "activo;");
+        strcpy(jugadaEnviar, "*;");
+        strcpy(turnoEnviar, "*;");
+        strcpy(xEnviar, "*;");
+        strcpy(yEnviar, "*;");
+        strcpy(tableroEnviar, "*;");
+    }
+
     // concatenamos todos los nuevos datos a respuesta
     strcat(respuesta, nuevoId);
     strcat(respuesta, hora);
     strcat(respuesta, duracion);
     strcat(respuesta, programa);
+    strcat(respuesta, origenEnviar);
+    strcat(respuesta, destinoEnviar);
+    strcat(respuesta, eventoEnviar);
+    strcat(respuesta, estadoEnviar);
+    strcat(respuesta, jugadaEnviar);
+    strcat(respuesta, turnoEnviar);
+    strcat(respuesta, xEnviar);
+    strcat(respuesta, yEnviar);
+    strcat(respuesta, tableroEnviar);
+    strcat(respuesta, "#.");
 }
