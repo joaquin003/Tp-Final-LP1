@@ -15,7 +15,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-#define BUFLEN 512
+#define BUFLEN 1000
 #define PORT 9999
 #define ADDRESS "127.0.0.1" // aka "localhost"
 #define MAX_CLIENTS 1

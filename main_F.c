@@ -105,14 +105,7 @@ void socketServidor(FILE *registro, int modoLocal)
             // echo message back
             char respuesta[1000];
             leer_mensaje(registro, recvbuf, respuesta, modoLocal);
-            sendRes = send(client, respuesta, res, 0);
-            if (sendRes != res)
-            {
-                printf("Error sending %d\n", WSAGetLastError());
-                shutdown(client, SD_BOTH);
-                closesocket(client);
-                break;
-            }
+            enviarMensaje(&client, respuesta);
         }
         else if (!res)
         {
@@ -365,7 +358,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     char turnoRecibido[20];
     char xRecibido[20];
     char yRecibido[20];
-    char tableroRecibido[20];
+    char tableroRecibido[300];
 
     // datos para el nuevo mensaje
     char nuevoId[20];
@@ -379,7 +372,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     char turnoEnviar[20];
     char xEnviar[20];
     char yEnviar[20];
-    char tableroEnviar[20];
+    char tableroEnviar[300];
 
     if (modoLocal)
     {
@@ -537,7 +530,16 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         strcpy(yEnviar, "*;");
         strcpy(tableroEnviar, "*;");
     }
-
+    else if (strcmp(eventoRecibido, "empezar") == 0)
+    {
+        strcpy(eventoEnviar, "jugar;");
+        strcpy(estadoEnviar, "activo;");
+        strcpy(jugadaEnviar, "1;");
+        strcpy(turnoEnviar, "1;");
+        strcpy(xEnviar, "0;");
+        strcpy(yEnviar, "0;");
+        strcpy(tableroEnviar, "[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];");
+    }
     // concatenamos todos los nuevos datos a respuesta
     strcat(respuesta, nuevoId);
     strcat(respuesta, hora);
