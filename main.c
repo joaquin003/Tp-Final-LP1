@@ -13,10 +13,9 @@ int main()
     // printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
     // scanf("%s", direccion);
     // registro = fopen(direccion, "w"); // guarda el archivo en la direccion y con el nombre que el usuario desea
-
+    registro = fopen(direccion, "w");
     while (decisionMenu != 5)
     {
-        registro = fopen(direccion, "w");
         if (modoLocal && !modoVisita)
         {
             strcpy(modoActivo, "Modo Local");
