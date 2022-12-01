@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-
+#include <math.h>
 #pragma comment(lib, "Ws2_32.lib")
 
 #define BUFLEN 1000
