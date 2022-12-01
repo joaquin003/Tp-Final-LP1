@@ -120,6 +120,14 @@ int main()
         }
         else if (decisionMenu == 4) // ayuda
         {
+            system("cls");
+            printf("\nAntes de comenzar la partida usted debe hacer: \n");
+            printf("1) Elegir si va a jugar como Local o Visitante \n");
+            printf("Para cambiar esos valores vaya a Configuracion de parametros \n");
+            printf("2) Indicar la ruta y el nombre del archivo txt \n");
+            printf("Para cambiar esos valores vaya a Configuracion de parametros \n\n");
+            printf("Para comenzar la partida seleccione Empezar partida luego de completar los pasos anteriores\n\n");
+            system("pause");
         }
         else if (decisionMenu == 5) // salir
         {

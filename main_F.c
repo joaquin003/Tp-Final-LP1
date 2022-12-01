@@ -890,5 +890,4 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     strcat(respuesta, yEnviar);
     strcat(respuesta, tableroEnviar);
     strcat(respuesta, "#.");
-    fflush(stdout);
 }
