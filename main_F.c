@@ -578,8 +578,16 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             else if (j == 8) // jugada
             {
-                printf("Token: %s\n", token);
+                printf("Token jugada: %s\n", token);
                 fprintf(registro, "Numero-jugada:%s.**********\n", token);
+
+                if (strcmp(token, "*") != 0)
+                {
+                    // cambiamos el valor para concatenar al mensaje de respuesta
+                    int x = atoi(token);
+                    itoa(x + 1, jugadaEnviar, 10); // convertimos el nuevo id a string
+                    strcat(jugadaEnviar, ";");     // agregamos ; al atributoId
+                }
             }
             else if (j == 9) // turno
             {
@@ -855,7 +863,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         // printf("\n TABLERO-ENVIAR%s\n",tableroEnviar);
         strcpy(eventoEnviar, "jugar;");
         strcpy(estadoEnviar, "activo;");
-        strcpy(jugadaEnviar, "1;");
         itoa(us, turnoEnviar, 10);
         strcat(turnoEnviar, ";");
     }
