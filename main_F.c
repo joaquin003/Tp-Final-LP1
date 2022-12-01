@@ -4,8 +4,6 @@ int running = 0;
 
 void socketServidor(FILE *registro, int modoLocal)
 {
-    printf("Hello world\n");
-
     int res, sendRes;
 
     // INITIALIZATION ==============================
@@ -490,19 +488,16 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     char yEnviar[20];
     char tableroEnviar[300];
 
+    strcpy(origenEnviar, "7;");
     if (modoLocal)
     {
         strcpy(programa, "servidor;");
-        strcpy(origenEnviar, "1;");
-        strcpy(destinoEnviar, "2;");
         us = 1;
         contrario = 2;
     }
     else
     {
         strcpy(programa, "cliente;");
-        strcpy(origenEnviar, "2;");
-        strcpy(destinoEnviar, "1;");
         us = 2;
         contrario = 1;
     }
@@ -542,12 +537,15 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             else if (j == 4) // origen
             {
-                printf("Token: %s\n", token);
+                printf("Token origen: %s\n", token);
                 fprintf(registro, "Mensaje-origen:%s. ", token);
+
+                strcpy(destinoEnviar, token);
+                strcat(destinoEnviar, ";");
             }
             else if (j == 5) // destino
             {
-                printf("Token: %s\n", token);
+                printf("Token destino: %s\n", token);
                 fprintf(registro, "Mensaje-destino:%s.\n", token);
             }
             else if (j == 6) // evento
