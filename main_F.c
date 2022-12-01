@@ -75,14 +75,14 @@ void socketServidor(FILE *registro, int modoLocal)
     printf("Client connected at %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
     // send welcome message
-    char *welcome = "Bienvenido al servidor!";
+    /*char *welcome = "Bienvenido al servidor!";
     sendRes = send(client, welcome, strlen(welcome), 0);
     if (sendRes != strlen(welcome))
     {
         printf("Error sending %d\n", WSAGetLastError());
         shutdown(client, SD_BOTH);
         closesocket(client);
-    }
+    }*/
 
     // receive messages
     char recvbuf[BUFLEN];
@@ -95,14 +95,7 @@ void socketServidor(FILE *registro, int modoLocal)
             recvbuf[res] = '\0';
             printf("Message received (%d): %s\n", res, recvbuf);
 
-            if (!memcmp(recvbuf, "/quit", 5 * sizeof(char)))
-            {
-                // received quit command
-                printf("Closing connection.\n");
-                break;
-            }
-
-            // echo message back
+            // enviar mensaje
             char respuesta[1000];
             leer_mensaje(registro, recvbuf, respuesta, modoLocal);
             enviarMensaje(&client, respuesta);
@@ -163,8 +156,6 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN])
 
 void socketCliente(FILE *registro, int modoLocal)
 {
-    printf("Hello World\n");
-
     int res;
 
     // INITIALIZATION ================================
@@ -201,9 +192,27 @@ void socketCliente(FILE *registro, int modoLocal)
         closesocket(client);
         WSACleanup();
     }
+    else
+    {
+        // se envia el primer mensaje cuando se logro conectarse
+        char mensaje[1000] = "";
+        strcat(mensaje, "1;");
+        // hora en que vamos a enviar el mensaje
+        time_t t;
+        struct tm *tm;
+        char hora[100];
+
+        t = time(NULL);
+        tm = localtime(&t);
+        strftime(hora, 100, "%H:%M:%S", tm);
+
+        strcat(hora, ";");
+        strcat(mensaje, hora);
+        strcat(mensaje, "*;cliente;7;*;conectar;pendiente;*;*;*;*;*;#.");
+        enviarMensaje(&client, mensaje);
+    }
 
     // set as running
-    printf("Successfully connected to %s: %d\n", ADDRESS, PORT);
     running = !0; // true
 
     // ===============================================
@@ -221,30 +230,9 @@ void socketCliente(FILE *registro, int modoLocal)
         if (res > 0)
         {
             printf("Mensaje recibido (%d): %s\n", res, recvbuf);
-            if (strcmp(recvbuf, "Bienvenido al servidor!") == 0)
-            {
-                char mensaje[1000] = "";
-                strcat(mensaje, "1;");
-                // hora en que vamos a enviar el mensaje
-                time_t t;
-                struct tm *tm;
-                char hora[100];
-
-                t = time(NULL);
-                tm = localtime(&t);
-                strftime(hora, 100, "%H:%M:%S", tm);
-
-                strcat(hora, ";");
-                strcat(mensaje, hora);
-                strcat(mensaje, "*;cliente;2;*;conectar;pendiente;*;*;*;*;*;#.");
-                enviarMensaje(&client, mensaje);
-            }
-            else
-            {
-                char respuesta[1000];
-                leer_mensaje(registro, recvbuf, respuesta, modoLocal);
-                enviarMensaje(&client, respuesta);
-            }
+            char respuesta[1000];
+            leer_mensaje(registro, recvbuf, respuesta, modoLocal);
+            enviarMensaje(&client, respuesta);
         }
         else if (!res)
         {
