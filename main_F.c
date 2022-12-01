@@ -145,38 +145,6 @@ void socketServidor(FILE *registro, int modoLocal)
     printf("Shutting down. \nGood night.\n");
 }
 
-DWORD WINAPI sendThreadFunc(LPVOID lpParam)
-{
-    SOCKET client = *(SOCKET *)lpParam;
-
-    char sendbuf[BUFLEN];
-    int sendbuflen, res;
-
-    while (running)
-    {
-        scanf("%s", sendbuf);
-
-        if (!running)
-        {
-            break;
-        }
-
-        sendbuflen = strlen(sendbuf);
-        res = send(client, sendbuf, sendbuflen, 0);
-
-        if (res != sendbuflen)
-        {
-            printf("Send failed.\n");
-            break;
-        }
-        else if (!memcmp(sendbuf, "/leave", 6))
-        {
-            running = 0;
-            break;
-        }
-    }
-}
-
 DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN])
 {
     SOCKET client = *(SOCKET *)lpParam;
@@ -242,19 +210,6 @@ void socketCliente(FILE *registro, int modoLocal)
 
     // MAIN LOOP =====================================
 
-    // start send thread
-    DWORD thrdId;
-    HANDLE sendThread = CreateThread(NULL, 0, sendThreadFunc, &client, 0, &thrdId);
-
-    if (sendThread)
-    {
-        printf("Send thread started with thread ID: %d\n", thrdId);
-    }
-    else
-    {
-        printf("Send thread failed: %d\n", GetLastError());
-    }
-
     // receive loop
     char recvbuf[BUFLEN];
 
@@ -305,12 +260,6 @@ void socketCliente(FILE *registro, int modoLocal)
     } while (running && res > 0);
     running = 0;
 
-    // connection finished, terminate send thread
-    if (CloseHandle(sendThread))
-    {
-        printf("Send thread closed successfully\n");
-    }
-
     // ===============================================
 
     // CLEANUP =======================================
@@ -337,8 +286,6 @@ int marcaServidor(char *tiempo)
     tiempoSegundos = (h * 3600) + (m * 60) + s;
     return tiempoSegundos;
 }
-
-
 
 int inferiorDerecho(int A[10][10], int x, int y, int buscar)
 {
@@ -501,26 +448,22 @@ int validarPosicion(int tablero[10][10], int posicionFila, int posicionCol, int 
     }
 }
 
-
-//comprobar si el tablero coincide con la posicion que agrego y viceversa
-int validarJugada(int original[10][10],int nuevo[10][10],int x, int y,int jugador){
-    original[x][y]=jugador;
+// comprobar si el tablero coincide con la posicion que agrego y viceversa
+int validarJugada(int original[10][10], int nuevo[10][10], int x, int y, int jugador)
+{
+    original[x][y] = jugador;
     for (int i = 0; i < 10; i++)
     {
         for (int j = 0; j < 10; j++)
         {
-            if (original[i][j]!=nuevo[i][j])
+            if (original[i][j] != nuevo[i][j])
             {
                 return 0;
             }
-            
         }
-        
     }
     return 1;
-    
 }
-
 
 void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal)
 {
@@ -532,8 +475,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     int j = 0;
     char *aux;
     char salto = '\n';
-    int contrario=0;
-    int us=0;
+    int contrario = 0;
+    int us = 0;
     // datos del mensaje
     int tiempoRecibido = 0;
     char eventoRecibido[20];
@@ -564,16 +507,16 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         strcpy(programa, "servidor;");
         strcpy(origenEnviar, "1;");
         strcpy(destinoEnviar, "2;");
-        us=1;
-        contrario=2;
+        us = 1;
+        contrario = 2;
     }
     else
     {
         strcpy(programa, "cliente;");
         strcpy(origenEnviar, "2;");
         strcpy(destinoEnviar, "1;");
-        us=2;
-        contrario=1;
+        us = 2;
+        contrario = 1;
     }
 
     if (token != NULL)
@@ -625,7 +568,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                 fprintf(registro, "Evento:%s. ", token);
 
                 strcpy(eventoRecibido, token);
-               
             }
             else if (j == 7) // estado
             {
@@ -647,7 +589,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (j == 10) // posicion en x
             {
                 aux = token;
-                strcpy(xRecibido,aux);
+                strcpy(xRecibido, aux);
             }
             else if (j == 11) // posicion en y
             {
@@ -657,7 +599,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             else if (j == 12) // TABLERO!!!!!!!!
             {
-                strcpy(tableroRecibido,token);
+                strcpy(tableroRecibido, token);
                 int cont = 0, // contador que hace los saltos de linea
                     k = 0;    // contador de caracteres dentro del tablero
                 printf("Token: %s\n", token);
@@ -689,7 +631,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     }
     fputc(salto, registro);
 
-
     if (strcmp(eventoRecibido, "conectar") == 0)
     {
         strcpy(eventoEnviar, "iniciar;");
@@ -715,7 +656,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         strcpy(eventoEnviar, "jugar;");
         strcpy(estadoEnviar, "activo;");
         strcpy(jugadaEnviar, "1;");
-        itoa(us,turnoEnviar,10);
+        itoa(us, turnoEnviar, 10);
         strcat(turnoEnviar, ";");
         int matriz[10][10];
 
@@ -729,92 +670,93 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
         }
         // posicion en donde haremos la jugada
-        int ban=0;
+        int ban = 0;
 
-        while(ban!=1)
+        while (ban != 1)
         {
-            int i=rand() % 10, j=rand() % 10;
-            
-                int resultado = 0;
-                int resultadoContrario = 0;
-                
-                // hay que validar que la posicion no tenga elemento
-                if (matriz[i][j] == 0)
+            int i = rand() % 10, j = rand() % 10;
+
+            int resultado = 0;
+            int resultadoContrario = 0;
+
+            // hay que validar que la posicion no tenga elemento
+            if (matriz[i][j] == 0)
+            {
+                // verificarmos si se forma un cuadrado para nosotros
+                resultado = validarPosicion(matriz, i, j, us);
+
+                // verificamos si se forma un cuadrado para el contrario
+                resultadoContrario = validarPosicion(matriz, i, j, contrario);
+
+                // si no se forma para ninguno, colocamos nuestro valor
+                if (!resultado && !resultadoContrario)
                 {
-                    // verificarmos si se forma un cuadrado para nosotros
-                    resultado = validarPosicion(matriz, i, j, us);
-
-                    // verificamos si se forma un cuadrado para el contrario
-                    resultadoContrario = validarPosicion(matriz, i, j, contrario);
-
-                    // si no se forma para ninguno, colocamos nuestro valor
-                    if (!resultado && !resultadoContrario)
-                    {
-                        matriz[i][j] = us;
-                        // agregamos las posiciones a nuestras variables para luego enviar el mensaje
-                        itoa(i,xEnviar,10);
-                        itoa(j,yEnviar,10);
-                        ban=1;
-                    }
+                    matriz[i][j] = us;
+                    // agregamos las posiciones a nuestras variables para luego enviar el mensaje
+                    itoa(i, xEnviar, 10);
+                    itoa(j, yEnviar, 10);
+                    ban = 1;
                 }
+            }
         }
 
-        //cargamos al tablero nuevo para luego agregarlo a la respuesta
-        tableroEnviar[0]='[';
-        int f=0, c=0, val=1, cont=1;
-        
-        while (val<200)
+        // cargamos al tablero nuevo para luego agregarlo a la respuesta
+        tableroEnviar[0] = '[';
+        int f = 0, c = 0, val = 1, cont = 1;
+
+        while (val < 200)
         {
-            if (cont%10==0) //para hacer el cambio de fila
+            if (cont % 10 == 0) // para hacer el cambio de fila
             {
-                tableroEnviar[val]=matriz[f][c]+'0';
-                tableroEnviar[val+1]=',';
+                tableroEnviar[val] = matriz[f][c] + '0';
+                tableroEnviar[val + 1] = ',';
                 f++;
-                c=0;
+                c = 0;
             }
-            else{
-                tableroEnviar[val]=matriz[f][c]+'0';
-                tableroEnviar[val+1]=',';
+            else
+            {
+                tableroEnviar[val] = matriz[f][c] + '0';
+                tableroEnviar[val + 1] = ',';
                 c++;
             }
-            val=val+2;
+            val = val + 2;
             cont++;
         }
-        tableroEnviar[val-1]=']';
-        tableroEnviar[val]='\0';
+        tableroEnviar[val - 1] = ']';
+        tableroEnviar[val] = '\0';
         strcat(xEnviar, ";");
         strcat(yEnviar, ";");
-        strcat(tableroEnviar,";");
-        //printf("\n TABLEROENVIAR%s\n",tableroEnviar);
+        strcat(tableroEnviar, ";");
+        // printf("\n TABLEROENVIAR%s\n",tableroEnviar);
     }
 
     else if (strcmp(estadoRecibido, "activo") == 0 && strcmp(eventoRecibido, "jugar") == 0)
     {
-       
-        int fila=0, columna=0, p=0, contador=1;
+
+        int fila = 0, columna = 0, p = 0, contador = 1;
         char auxi[1];
         int matriz[10][10];
 
-        while (p<strlen(tableroRecibido))
+        while (p < strlen(tableroRecibido))
         {
-            
-            if (contador%10==0) //para hacer el cambio de fila
+
+            if (contador % 10 == 0) // para hacer el cambio de fila
             {
-                auxi[0]=tableroRecibido[p];
-               
-                matriz[fila][columna]=atoi(auxi);
-             
+                auxi[0] = tableroRecibido[p];
+
+                matriz[fila][columna] = atoi(auxi);
+
                 fila++;
-                columna=0;
+                columna = 0;
             }
-            else{
-                auxi[0]=tableroRecibido[p];
-             
-           
-                matriz[fila][columna]=atoi(auxi);
+            else
+            {
+                auxi[0] = tableroRecibido[p];
+
+                matriz[fila][columna] = atoi(auxi);
                 columna++;
             }
-            p=p+2;
+            p = p + 2;
             contador++;
         }
         printf("soy matriz\n");
@@ -827,7 +769,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             printf("\n");
         }
-        
+
         /*
         if (validarJugada(matriz,tableroRecibido,xRecibido,yRecibido,contrario)!=0);
         {
@@ -836,87 +778,88 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             matriz[xNuevo][yNuevo]=contrario;
         }
         */
-       
+
         // posicion en donde haremos la jugada
-        int ban=0;
+        int ban = 0;
 
-        while(ban!=1)
+        while (ban != 1)
         {
-            int i=rand() % 10, j=rand() % 10;
-            
-                int resultado = 0;
-                int resultadoContrario = 0;
-                
-                // hay que validar que la posicion no tenga elemento
-                if (matriz[i][j] == 0)
-                {
-                    // verificarmos si se forma un cuadrado para nosotros
-                    resultado = validarPosicion(matriz, i, j, us);
+            int i = rand() % 10, j = rand() % 10;
 
-                    // verificamos si se forma un cuadrado para el contrario
-                    resultadoContrario = validarPosicion(matriz, i, j, contrario);
+            int resultado = 0;
+            int resultadoContrario = 0;
 
-                    // si no se forma para ninguno, colocamos nuestro valor
-                    if (!resultado && !resultadoContrario)
-                    {
-                        matriz[i][j] = us;
-                        // agregamos las posiciones a nuestras variables para luego enviar el mensaje
-                        itoa(i,xEnviar,10);
-                        itoa(j,yEnviar,10);
-                        ban=1;
-                    }
-                    else if (!resultado && resultadoContrario)
-                    {
-                        printf("\n GANAMOS \n");
-                        running=0;
-                    }
-                    else if (resultado && !resultadoContrario)
-                    {
-                        printf("\n GANO EL CONTRARIO \n");
-                        running=0;
-                    }
-                    
-                    else
-                    {
-                        printf("EMPATE");
-                        running=0;
-                    }
-                }
-        }
-        //cargamos al tablero nuevo para luego agregarlo a la respuesta
-        tableroEnviar[0]='[';
-        int f=0, c=0, val=1, cont=1;
-        
-        while (val<200)
-        {
-            if (cont%10==0) //para hacer el cambio de fila
+            // hay que validar que la posicion no tenga elemento
+            if (matriz[i][j] == 0)
             {
-                tableroEnviar[val]=matriz[f][c]+'0';
-                tableroEnviar[val+1]=',';
-                f++;
-                c=0;
+                // verificarmos si se forma un cuadrado para nosotros
+                resultado = validarPosicion(matriz, i, j, us);
+
+                // verificamos si se forma un cuadrado para el contrario
+                resultadoContrario = validarPosicion(matriz, i, j, contrario);
+
+                // si no se forma para ninguno, colocamos nuestro valor
+                if (!resultado && !resultadoContrario)
+                {
+                    matriz[i][j] = us;
+                    // agregamos las posiciones a nuestras variables para luego enviar el mensaje
+                    itoa(i, xEnviar, 10);
+                    itoa(j, yEnviar, 10);
+                    ban = 1;
+                }
+                else if (!resultado && resultadoContrario)
+                {
+                    printf("\n GANAMOS \n");
+                    running = 0;
+                }
+                else if (resultado && !resultadoContrario)
+                {
+                    printf("\n GANO EL CONTRARIO \n");
+                    running = 0;
+                }
+
+                else
+                {
+                    printf("EMPATE");
+                    running = 0;
+                }
             }
-            else{
-                tableroEnviar[val]=matriz[f][c]+'0';
-                tableroEnviar[val+1]=',';
+        }
+        // cargamos al tablero nuevo para luego agregarlo a la respuesta
+        tableroEnviar[0] = '[';
+        int f = 0, c = 0, val = 1, cont = 1;
+
+        while (val < 200)
+        {
+            if (cont % 10 == 0) // para hacer el cambio de fila
+            {
+                tableroEnviar[val] = matriz[f][c] + '0';
+                tableroEnviar[val + 1] = ',';
+                f++;
+                c = 0;
+            }
+            else
+            {
+                tableroEnviar[val] = matriz[f][c] + '0';
+                tableroEnviar[val + 1] = ',';
                 c++;
             }
-            val=val+2;
+            val = val + 2;
             cont++;
         }
-        tableroEnviar[val-1]=']';
-        tableroEnviar[val]='\0';
-        strcat(tableroEnviar,";");
+        tableroEnviar[val - 1] = ']';
+        tableroEnviar[val] = '\0';
+        strcat(tableroEnviar, ";");
         strcat(xEnviar, ";");
         strcat(yEnviar, ";");
-        //printf("\n TABLERO-ENVIAR%s\n",tableroEnviar);
+        // printf("\n TABLERO-ENVIAR%s\n",tableroEnviar);
         strcpy(eventoEnviar, "jugar;");
         strcpy(estadoEnviar, "activo;");
         strcpy(jugadaEnviar, "1;");
-        itoa(us,turnoEnviar,10);
+        itoa(us, turnoEnviar, 10);
         strcat(turnoEnviar, ";");
     }
-        
+
     // hora en que vamos a enviar el mensaje
     time_t t;
     struct tm *tm;

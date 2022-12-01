@@ -21,7 +21,6 @@
 #define MAX_CLIENTS 1
 
 void socketServidor(FILE *registro, int modoLocal);
-DWORD WINAPI sendThreadFunc(LPVOID lpParam);
 void socketCliente(FILE *registro, int modoLocal);
 void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal);
 DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN]);
