@@ -86,7 +86,7 @@ void socketServidor(FILE *registro, int modoLocal)
             // enviar mensaje
             char respuesta[1000];
             leer_mensaje(registro, recvbuf, respuesta, modoLocal);
-            enviarMensaje(&client, respuesta, registro);
+            enviarMensaje(&client, respuesta, registro, modoLocal);
         }
         else if (!res)
         {
@@ -126,7 +126,7 @@ void socketServidor(FILE *registro, int modoLocal)
     printf("Shutting down. \nGood night.\n");
 }
 
-DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro)
+DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro, int modoLocal)
 {
     SOCKET client = *(SOCKET *)lpParam;
 
@@ -141,11 +141,25 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro)
         printf("Send failed.\n");
     }
 
+    printf("Mensaje ENVIADO: %s\n", mensaje);
+
     char delimitador[] = "[];#";
     char *token = strtok(mensaje, delimitador);
     int j = 0;
     char *aux;
     char salto = '\n';
+    char *jugadas;
+    char programa[20];
+    if (modoLocal)
+    {
+        strcpy(programa, "servidor;");
+    }
+    else
+    {
+        strcpy(programa, "cliente;");
+    }
+
+    fprintf(registro, "######Programa:%s\n", programa);
 
     if (token != NULL)
     {
@@ -159,16 +173,17 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro)
             {
                 printf("Token: %s\n", token);
                 // agregamos el valor al archivo
-                fprintf(registro, "#####Mensaje-id:%s\n", token);
+                fprintf(registro, "Mensaje-id:%s", token);
             }
             else if (j == 1) // marca temporal
             {
                 printf("Token: %s\n", token);
-                fprintf(registro, "Marca-de-tiempo:%s. ", token);
+                fprintf(registro, "     Marca-de-tiempo:%s. ", token);
             }
             else if (j == 2) // duracion
             {
                 printf("Token: %s\n", token);
+                fprintf(registro, "      Duracion:%s");
             }
             else if (j == 3) // programa
             {
@@ -177,7 +192,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro)
             else if (j == 4) // origen
             {
                 printf("Token origen: %s\n", token);
-                fprintf(registro, "Mensaje-origen:%s. ", token);
+                fprintf(registro, "\nMensaje-origen:%s. ", token);
             }
             else if (j == 5) // destino
             {
@@ -197,12 +212,15 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro)
             else if (j == 8) // jugada
             {
                 printf("Token jugada: %s\n", token);
-                fprintf(registro, "Numero-jugada:%s.**********\n", token);
+                jugadas = token;
+                // fprintf(registro, "Numero-jugada:%s.**********\n", token);
             }
             else if (j == 9) // turno
             {
                 printf("Token: %s\n", token);
-                fprintf(registro, "**********Turno-jugada:Jugador-%s. ", token);
+                // fprintf(registro, "**********Turno-jugada:Jugador-%s. ", token);
+                fprintf(registro, "------------Turno-jugador:Jugador-%s. ", token);
+                fprintf(registro, "Numero-jugada:%s.------------\n", jugadas);
             }
             else if (j == 10) // posicion en x
             {
@@ -215,6 +233,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro)
             }
             else if (j == 12) // TABLERO!!!!!!!!
             {
+                fprintf(registro, "Tablero-actual:\n");
                 int cont = 0, // contador que hace los saltos de linea
                     k = 0;    // contador de caracteres dentro del tablero
                 printf("Token: %s\n", token);
@@ -302,7 +321,7 @@ void socketCliente(FILE *registro, int modoLocal)
         strcat(hora, ";");
         strcat(mensaje, hora);
         strcat(mensaje, "*;cliente;7;*;conectar;pendiente;*;*;*;*;*;#.");
-        enviarMensaje(&client, mensaje, registro);
+        enviarMensaje(&client, mensaje, registro, modoLocal);
     }
 
     // set as running
@@ -325,7 +344,7 @@ void socketCliente(FILE *registro, int modoLocal)
             printf("Mensaje recibido (%d): %s\n", res, recvbuf);
             char respuesta[1000];
             leer_mensaje(registro, recvbuf, respuesta, modoLocal);
-            enviarMensaje(&client, respuesta, registro);
+            enviarMensaje(&client, respuesta, registro, modoLocal);
         }
         else if (!res)
         {
@@ -572,6 +591,7 @@ int seFormoCuadrado(int A[10][10], int buscar)
                 {
                     seFormoCuadrado = 1;
                     printf("\n EN SE FORMA\n");
+                    printf("\n POSICION DONDE FORMA  ----> (%d,%d)\n", i, j);
                 }
             }
         }
@@ -584,9 +604,9 @@ int cantVacias(int A[10][10])
 {
     int vacias = 0;
 
-    for (int i = 0; i < 10 - 1; i++)
+    for (int i = 0; i < 10; i++)
     {
-        for (int j = 0; j < 10 - 1; j++)
+        for (int j = 0; j < 10; j++)
         {
             if (A[i][j] == 0)
             {
@@ -610,6 +630,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     char salto = '\n';
     int contrario = 0;
     int us = 0;
+    char *jugadas;
+
     // datos del mensaje
     int tiempoRecibido = 0;
     char eventoRecibido[20];
@@ -620,7 +642,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     char xRecibido[20];
     char yRecibido[20];
     char tableroRecibido[199];
-
     // datos para el nuevo mensaje
     char nuevoId[20];
     char duracion[20];
@@ -638,16 +659,18 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     strcpy(origenEnviar, "7;");
     if (modoLocal)
     {
-        strcpy(programa, "servidor;");
+        strcpy(programa, "cliente;");
         us = 1;
         contrario = 2;
     }
     else
     {
-        strcpy(programa, "cliente;");
+        strcpy(programa, "servidor;");
         us = 2;
         contrario = 1;
     }
+
+    fprintf(registro, "######Programa:%s\n", programa);
 
     if (token != NULL)
     {
@@ -661,7 +684,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             {
                 printf("Token: %s\n", token);
                 // agregamos el valor al archivo
-                fprintf(registro, "#####Mensaje-id:%s\n", token);
+                fprintf(registro, "Mensaje-id:%s", token);
 
                 // cambiamos el valor para concatenar al mensaje de respuesta
                 int x = atoi(token);
@@ -672,11 +695,12 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             {
                 printf("Token: %s\n", token);
                 tiempoRecibido = marcaServidor(token);
-                fprintf(registro, "Marca-de-tiempo:%s. ", token);
+                fprintf(registro, "     Marca-de-tiempo:%s. ", token);
             }
             else if (j == 2) // duracion
             {
                 printf("Token: %s\n", token);
+                fprintf(registro, "      Duracion:%s");
             }
             else if (j == 3) // programa
             {
@@ -685,7 +709,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (j == 4) // origen
             {
                 printf("Token origen: %s\n", token);
-                fprintf(registro, "Mensaje-origen:%s. ", token);
+                fprintf(registro, "\nMensaje-origen:%s. ", token);
 
                 strcpy(destinoEnviar, token);
                 strcat(destinoEnviar, ";");
@@ -712,7 +736,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (j == 8) // jugada
             {
                 printf("Token jugada: %s\n", token);
-                fprintf(registro, "Numero-jugada:%s.**********\n", token);
+                jugadas = token;
 
                 if (strcmp(token, "*") != 0)
                 {
@@ -725,7 +749,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (j == 9) // turno
             {
                 printf("Token: %s\n", token);
-                fprintf(registro, "**********Turno-jugada:Jugador-%s. ", token);
+                fprintf(registro, "------------Turno-jugador:Jugador-%s. ", token);
+                fprintf(registro, "Numero-jugada:%s.------------\n", jugadas);
             }
             else if (j == 10) // posicion en x
             {
@@ -740,6 +765,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             else if (j == 12) // TABLERO!!!!!!!!
             {
+                fprintf(registro, "Tablero-actual:\n");
                 strcpy(tableroRecibido, token);
                 int cont = 0, // contador que hace los saltos de linea
                     k = 0;    // contador de caracteres dentro del tablero
@@ -1014,13 +1040,28 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
 
         int seFormo_contrario = seFormoCuadrado(matriz, contrario);
         int seFormo_nosotros = seFormoCuadrado(matriz, us);
-        if (!seFormo_contrario && !seFormo_nosotros)
+        int t_lleno = 1, row = 0;
+        while (row < 10 || t_lleno != 0)
+        {
+            int col = 0;
+            while (col < 10 || t_lleno != 0)
+            {
+                if (matriz[row][col] == 0)
+                {
+                    t_lleno = 0;
+                }
+                col++;
+            }
+            row++;
+        }
+
+        if (!seFormo_contrario && !seFormo_nosotros && t_lleno == 0)
         {
             // posicion en donde haremos la jugada
             int ban = 0;
-            int vacias = cantVacias(matriz); // contar la cantidad de posiciones con 0
-            int contador = 0;
-
+            int v = cantVacias(matriz); // contar la cantidad de posiciones con 0
+            int contar = 0;
+            int validador = 0;
             while (ban != 1)
             {
                 int i = rand() % 10, j = rand() % 10;
@@ -1031,6 +1072,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                 // hay que validar que la posicion no tenga elemento
                 if (matriz[i][j] == 0)
                 {
+
                     // verificarmos si se forma un cuadrado para nosotros
                     resultado = validarPosicion(matriz, i, j, us);
 
@@ -1042,17 +1084,21 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                         itoa(i, xEnviar, 10);
                         itoa(j, yEnviar, 10);
                         ban = 1;
+                        printf("\ncoloqueee\n");
+                        validador = 1;
                     }
-                    if (contador == vacias)
+                    if (contar == v)
                     {
                         ban = 1;
                     }
-                    contador++;
+                    contar++;
                 }
             }
+            printf("\ncontador de vacias %d\n vacias: %d\n", contar, v);
             // si sale igual, significa que ya no hay otras posiciones donde no se puede hacer cuadrado
-            if (contador == vacias)
+            if (contar >= v && validador == 0)
             {
+                printf("\nENTRO EN EL VACIOO\n");
                 int coloco = 0;
                 for (int i = 0; i < 10 - 1; i++)
                 {
@@ -1062,6 +1108,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                         {
                             matriz[i][j] = us;
                             coloco = 1;
+                            itoa(i, xEnviar, 10);
+                            itoa(j, yEnviar, 10);
                         }
                     }
                 }
@@ -1215,6 +1263,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             strcat(respuesta, yEnviar);
             strcat(respuesta, tableroEnviar);
             strcat(respuesta, "#.");
+            running = 0;
+        }
+        else if (t_lleno == 1)
+        {
+            printf("tablero lleno");
             running = 0;
         }
     }

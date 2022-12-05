@@ -24,7 +24,7 @@ void socketServidor(FILE *registro, int modoLocal);
 void socketCliente(FILE *registro, int modoLocal);
 int cantVacias(int A[10][10]);
 void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal);
-DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro);
+DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro, int modoLocal);
 int marcaServidor(char *tiempo);
 int inferiorDerecho(int A[10][10], int x, int y, int buscar);
 int superiorDerecho(int A[10][10], int x, int y, int buscar);
