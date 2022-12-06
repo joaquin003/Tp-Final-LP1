@@ -1,6 +1,14 @@
 #include "main.h"
 
+// variables globales
 int running = 0;
+int jugadasContrario = 0;
+int jugadasMio = 0;
+int duracionTotal = 0;
+int duracionMio = 0;
+int duracionContrario = 0;
+char inicioJuego[20];
+char finJuego[20];
 
 void socketServidor(FILE *registro, int modoLocal)
 {
@@ -149,7 +157,16 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
     char *aux;
     char salto = '\n';
     char *jugadas;
+
+    // datos del mensaje a enviar
     char programa[20];
+    char estadoEnviado[20];
+    int duracionEnviado = 0;
+    char tiempoEnviado[20];
+    char origenEnviado[20];
+    char destinoEnviado[20];
+    char programaEnviado[20];
+
     if (modoLocal)
     {
         strcpy(programa, "servidor;");
@@ -179,40 +196,55 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "     Marca-de-tiempo:%s. ", token);
+                strcpy(tiempoEnviado, token);
             }
             else if (j == 2) // duracion
             {
                 printf("Token: %s\n", token);
-                fprintf(registro, "      Duracion:%s");
+                fprintf(registro, "      Duracion:%s", token);
+                duracionEnviado = atoi(token);
             }
             else if (j == 3) // programa
             {
                 printf("Token: %s\n", token);
+                strcpy(programaEnviado, token);
             }
             else if (j == 4) // origen
             {
                 printf("Token origen: %s\n", token);
                 fprintf(registro, "\nMensaje-origen:%s. ", token);
+                strcpy(origenEnviado, token);
             }
             else if (j == 5) // destino
             {
                 printf("Token destino: %s\n", token);
                 fprintf(registro, "Mensaje-destino:%s.\n", token);
+                strcpy(destinoEnviado, token);
             }
             else if (j == 6) // evento
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Evento:%s. ", token);
+                if (strcmp(token, "jugar") == 0)
+                {
+                    jugadasMio++;
+                    duracionMio += duracionEnviado;
+                }
             }
             else if (j == 7) // estado
             {
                 printf("Token: %s\n", token);
                 fprintf(registro, "Estado-juego:%s.\n", token);
+                strcpy(estadoEnviado, token);
             }
             else if (j == 8) // jugada
             {
                 printf("Token jugada: %s\n", token);
                 jugadas = token;
+                if (strcmp(token, "1") == 0)
+                {
+                    strcpy(inicioJuego, tiempoEnviado);
+                }
                 // fprintf(registro, "Numero-jugada:%s.**********\n", token);
             }
             else if (j == 9) // turno
@@ -264,6 +296,47 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         }
     }
     fputc(salto, registro);
+
+    if (strcmp(estadoEnviado, "finalizado exitoso") == 0)
+    {
+        // el que tenga mayor jugadas es el perdedor
+        if (jugadasContrario > jugadasMio) // yo gano
+        {
+            printf("Grupo Ganador: %s\n", origenEnviado);
+            if (strcpy(programa, "servidor") == 0)
+            {
+                printf("Jugador ganador: %s\n", "jugador 1");
+                printf("Modalidad ganadora: %s\n", "Local");
+            }
+            else
+            {
+                printf("Jugador ganador: %s\n", "jugador 2");
+                printf("Modalidad ganadora: %s\n", "Visita");
+            }
+        }
+        else // gano contrario
+        {
+            printf("Grupo Ganador: %s\n", destinoEnviado);
+            if (strcpy(programa, "servidor") == 0)
+            {
+                printf("Jugador ganador: %d\n", "jugador 2");
+                printf("Modalidad ganadora: %s\n", "Visita");
+            }
+            else
+            {
+                printf("Jugador ganador: %d\n", "jugador 1");
+                printf("Modalidad ganadora: %s\n", "Local");
+            }
+        }
+
+        printf("Jugadas mio: %d\n", jugadasMio);
+        printf("Jugadas contrario: %d\n", jugadasContrario);
+        printf("Tiempo promedio mio: %f\n", duracionMio / jugadasMio);
+        printf("Tiempo promedio contrario: %f\n", duracionContrario / jugadasContrario);
+        printf("Inicio juego: %s\n", inicioJuego);
+        printf("Fin juego: %s\n", tiempoEnviado);
+        printf("Duracion total: %d", duracionMio + duracionContrario);
+    }
 }
 
 void socketCliente(FILE *registro, int modoLocal)
@@ -634,6 +707,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
 
     // datos del mensaje
     int tiempoRecibido = 0;
+    char tiempRecibidoStr[20];
+    int duracionRecibido = 0;
     char eventoRecibido[20];
     char origenRecibido[20];
     char estadoRecibido[20];
@@ -694,13 +769,15 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (j == 1) // marca temporal
             {
                 printf("Token: %s\n", token);
+                strcpy(tiempRecibidoStr, token);
                 tiempoRecibido = marcaServidor(token);
                 fprintf(registro, "     Marca-de-tiempo:%s. ", token);
             }
             else if (j == 2) // duracion
             {
                 printf("Token: %s\n", token);
-                fprintf(registro, "      Duracion:%s");
+                fprintf(registro, "      Duracion:%s", token);
+                duracionRecibido = atoi(token);
             }
             else if (j == 3) // programa
             {
@@ -744,6 +821,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                     int x = atoi(token);
                     itoa(x + 1, jugadaEnviar, 10); // convertimos el nuevo id a string
                     strcat(jugadaEnviar, ";");     // agregamos ; al atributoId
+                }
+
+                if (strcmp(token, "1") == 0)
+                {
+                    strcpy(inicioJuego, tiempRecibidoStr);
                 }
             }
             else if (j == 9) // turno
@@ -1037,6 +1119,9 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             matriz[xNuevo][yNuevo]=contrario;
         }
         */
+        // cargamos datos del contrario
+        jugadasContrario++;
+        duracionContrario += duracionRecibido;
 
         int seFormo_contrario = seFormoCuadrado(matriz, contrario);
         int seFormo_nosotros = seFormoCuadrado(matriz, us);
@@ -1199,8 +1284,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             strcat(duracion, ";");
             strcat(hora, ";");
             // concatenamos todos los nuevos datos a respuesta
-            strcpy(eventoEnviar, "finalizar.;");
-            strcpy(estadoEnviar, "finalizado exitoso.;");
+            strcpy(eventoEnviar, "finalizar;");
+            strcpy(estadoEnviar, "finalizado exitoso;");
             strcpy(turnoEnviar, "*;");
             strcpy(xEnviar, "*;");
             strcpy(yEnviar, "*;");
@@ -1242,8 +1327,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             strcat(duracion, ";");
             strcat(hora, ";");
             // concatenamos todos los nuevos datos a respuesta
-            strcpy(eventoEnviar, "finalizar.;");
-            strcpy(estadoEnviar, "finalizado exitoso.;");
+            strcpy(eventoEnviar, "finalizar;");
+            strcpy(estadoEnviar, "finalizado exitoso;");
             strcpy(turnoEnviar, "*;");
             strcpy(xEnviar, "*;");
             strcpy(yEnviar, "*;");
@@ -1271,9 +1356,45 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             running = 0;
         }
     }
-    else if (strcmp(eventoRecibido, "finalizar.") == 0)
+    else if (strcmp(eventoRecibido, "finalizar") == 0)
     {
-        printf("termino");
+        printf("termino\n");
+        // el que tenga mayor jugadas es el perdedor
+        if (jugadasContrario > jugadasMio) // yo gano
+        {
+            printf("Grupo Ganador: %s\n", origenEnviar);
+            if (strcpy(programa, "servidor;") == 0)
+            {
+                printf("Jugador ganador: %s\n", "jugador 1");
+                printf("Modalidad ganadora: %s\n", "Local");
+            }
+            else
+            {
+                printf("Jugador ganador: %s\n", "jugador 2");
+                printf("Modalidad ganadora: %s\n", "Visita");
+            }
+        }
+        else // gano contrario
+        {
+            printf("Grupo Ganador: %s\n", destinoEnviar);
+            if (strcpy(programa, "servidor;") == 0)
+            {
+                printf("Jugador ganador: %s\n", "jugador 1");
+                printf("Modalidad ganadora: %s\n", "Local");
+            }
+            else
+            {
+                printf("Jugador ganador: %s\n", "jugador 2");
+                printf("Modalidad ganadora: %s\n", "Visita");
+            }
+        }
+        printf("Jugadas mio: %d\n", jugadasMio);
+        printf("Jugadas contrario: %d\n", jugadasContrario);
+        printf("Tiempo promedio mio: %f\n", duracionMio / jugadasMio);
+        printf("Tiempo promedio contrario: %f\n", duracionContrario / jugadasContrario);
+        printf("Inicio juego: %s\n", inicioJuego);
+        printf("Fin de juego: %s\n", tiempRecibidoStr);
+        printf("Duracion total: %d\n", duracionMio + duracionContrario);
         running = 0;
     }
 }
