@@ -85,18 +85,32 @@ int main()
                 }
                 else if (decisionParametros == 3) // directorio de archivos
                 {
-                    printf("Para ingresar la ruta, el nombre del directorio no debe contener espacios\n");
-                    printf("\nIngrese el directorio de archivos de salida: ");
-                    scanf("%s", direccion);
-                    printf("\nLa direccion ingresada es: %s\n", direccion);
-                    registro = fopen(direccion, "w");
-                    /* validacion de la direccion del archivo*/
-                    while (registro == NULL)
+                    if (modoLocal == 0 && modoVisita == 0)
                     {
-                        printf("\nError!!!! Por favor ingrese una carpeta y archivo de texto existente\n ");
-                        printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
+                        printf("\nSeleccione el modo antes de ingresar la ruta\n");
+                    }
+                    else
+                    {
+                        printf("Para ingresar la ruta, el nombre del directorio no debe contener espacios\n");
+                        printf("\nIngrese el directorio de archivos de salida: ");
                         scanf("%s", direccion);
+                        if (modoLocal == 1)
+                        {
+                            strcat(direccion, "std_servidor_grupo_7.txt");
+                        }
+                        else if (modoVisita == 1)
+                        {
+                            strcat(direccion, "std_cliente_grupo_7.txt");
+                        }
                         registro = fopen(direccion, "w");
+                        /* validacion de la direccion del archivo*/
+                        while (registro == NULL)
+                        {
+                            printf("\nError!!!! Por favor ingrese una carpeta y archivo de texto existente\n ");
+                            printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
+                            scanf("%s", direccion);
+                            registro = fopen(direccion, "w");
+                        }
                     }
                 }
                 else if (decisionParametros == 4) // ir atras
