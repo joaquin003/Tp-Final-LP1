@@ -686,13 +686,20 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             }
             else if (j == 12) // TABLERO!!!!!!!!
             {
-                fprintf(registro, "Tablero-actual:\n");
+                if (strlen(token) > 1)
+                {
+                    fprintf(registro, "Tablero-actual:\n");
+                }
+                else
+                {
+                    fprintf(registro, "Tablero-actual: *\n");
+                }
                 int cont = 0, // contador que hace los saltos de linea
                     k = 0;    // contador de caracteres dentro del tablero
                 printf("Token: %s\n", token);
                 strcpy(tableroNuestro, token);
                 /// guardamos el tablero en el archivo con el formato deseado
-                while (k < strlen(token)) // mientas no leamos todo el tablero
+                while (k < strlen(token) && strlen(token) > 1) // mientas no leamos todo el tablero
                 {
                     if (cont == 10)
                     {
@@ -984,13 +991,20 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             else if (j == 12) // TABLERO!!!!!!!!
             {
-                fprintf(registro, "Tablero-actual:\n");
+                if (strlen(token) > 1)
+                {
+                    fprintf(registro, "Tablero-actual:\n");
+                }
+                else
+                {
+                    fprintf(registro, "Tablero-actual: *\n");
+                }
                 strcpy(tableroRecibido, token);
                 int cont = 0, // contador que hace los saltos de linea
                     k = 0;    // contador de caracteres dentro del tablero
                 printf("Token: %s\n", token);
                 /// guardamos el tablero en el archivo con el formato deseado
-                while (k < strlen(token)) // mientas no leamos todo el tablero
+                while (k < strlen(token) && strlen(token) > 1) // mientas no leamos todo el tablero
                 {
                     if (cont == 10)
                     {
@@ -1016,6 +1030,15 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         }
     }
     fputc(salto, registro);
+
+    if (modoLocal)
+    {
+        strcpy(programa, "servidor;");
+    }
+    else
+    {
+        strcpy(programa, "cliente;");
+    }
 
     if (strcmp(eventoRecibido, "conectar") == 0)
     {
