@@ -35,3 +35,4 @@ int superiorIzquierdo(int A[10][10], int x, int y, int buscar);
 int conOrientacion(int A[10][10], int x, int y, int buscar);
 int validarPosicion(int tablero[10][10], int posicionFila, int posicionCol, int busqueda);
 int validarJugada(int original[10][10], int nuevo[10][10], int x, int y, int jugador);
+int verificarMensaje(char mensaje[], char *incorrecto);
