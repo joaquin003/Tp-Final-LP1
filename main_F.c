@@ -9,11 +9,13 @@ int duracionMio = 0;
 int duracionContrario = 0;
 char inicioJuego[20];
 char finJuego[20];
+int matrizEnviada[10][10];
 
 //  motivos de fallido
 int tardoMucho = 0;
 int mensajeValido = 1;
 char caracInvalid[20];
+int jugadaTrampa = 0;
 
 // variables del cuadrado formado
 int coordCuadrado[8];
@@ -518,8 +520,6 @@ int seFormoCuadrado(int A[10][10], int buscar)
                 if (resultado)
                 {
                     seFormoCuadrado = 1;
-                    printf("\n EN SE FORMA\n");
-                    printf("\n POSICION DONDE FORMA  ----> (%d,%d)\n", i, j);
                 }
             }
         }
@@ -578,6 +578,23 @@ int verificarMensaje(char mensaje[], char *incorrecto)
         }
     }
     return 0;
+}
+
+void verificarMatrices(int matrizOriginal[10][10], int matrizNueva[10][10], int posFila, int posCol)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            if (matrizOriginal[i][j] != matrizNueva[i][j])
+            {
+                if (i != posFila && j != posCol)
+                {
+                    jugadaTrampa = 1;
+                }
+            }
+        }
+    }
 }
 
 DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro, int modoLocal)
@@ -762,6 +779,35 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
                     k = k + 2;
                     cont++;
                 }
+
+                if (strlen(token) > 1)
+                {
+                    int fila = 0, columna = 0, p = 0, contador = 1;
+                    char auxi[1];
+
+                    while (p < strlen(token))
+                    {
+
+                        if (contador % 10 == 0) // para hacer el cambio de fila
+                        {
+                            auxi[0] = token[p];
+
+                            matrizEnviada[fila][columna] = atoi(auxi) / 10;
+
+                            fila++;
+                            columna = 0;
+                        }
+                        else
+                        {
+                            auxi[0] = token[p];
+
+                            matrizEnviada[fila][columna] = atoi(auxi) / 10;
+                            columna++;
+                        }
+                        p = p + 2;
+                        contador++;
+                    }
+                }
             }
             // Sólo en la primera pasamos la cadena; en las siguientes pasamos NULL
             token = strtok(NULL, delimitador);
@@ -902,6 +948,10 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         {
             printf("Motivo error: Caracter invalido en mensaje\n");
         }
+        else if (jugadaTrampa)
+        {
+            printf("Motivo error: Se encontro trampa en la jugada\n");
+        }
 
         // agregamos al archivo el mensaje final
         fprintf(registro, "====================fin del juego====================\n");
@@ -943,6 +993,10 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         else if (mensajeValido == 0)
         {
             fprintf(registro, "Motivo error: Caracter invalido en mensaje\n");
+        }
+        else if (jugadaTrampa)
+        {
+            fprintf(registro, "Motivo error: Se encontro trampa en la jugada\n");
         }
     }
 }
@@ -1355,7 +1409,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         strcat(respuesta, tableroEnviar);
         strcat(respuesta, "#.");
     }
-    else if (strcmp(estadoRecibido, "activo") == 0 && strcmp(eventoRecibido, "jugar") == 0 && tardoMucho == 0 && mensajeValido)
+    else if (strcmp(estadoRecibido, "activo") == 0 && strcmp(eventoRecibido, "jugar") == 0 && tardoMucho == 0 && mensajeValido && jugadaTrampa == 0)
     {
 
         int fila = 0, columna = 0, p = 0, contador = 1;
@@ -1384,6 +1438,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             p = p + 2;
             contador++;
         }
+        // verificar si hay trampa
+        verificarMatrices(matrizEnviada, matriz, atoi(xRecibido), atoi(yRecibido));
         printf("soy matriz\n");
         // imprimir datos de matriz
         for (int fila = 0; fila < 10; fila++)
@@ -1833,6 +1889,10 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             {
                 printf("Motivo error: Caracter invalido en mensaje\n");
             }
+            else
+            {
+                printf("Motivo error: Se encontro trampa en la jugada\n");
+            }
 
             // agregamos al archivo el mensaje final
             fprintf(registro, "====================fin del juego====================\n");
@@ -1875,11 +1935,15 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             {
                 fprintf(registro, "Motivo error: Caracter invalido en mensaje\n");
             }
+            else
+            {
+                fprintf(registro, "Motivo error: Se encontro trampa en la jugada\n");
+            }
         }
 
         running = 0;
     }
-    else if (tardoMucho == 1 || mensajeValido == 0)
+    else if (tardoMucho == 1 || mensajeValido == 0 || jugadaTrampa == 1)
     {
         // hora en que vamos a enviar el mensaje
         time_t t;
