@@ -32,14 +32,14 @@ int main()
             strcpy(numJugador, "No configurado");
         }
         printf("\nID Grupo: 7            Jugador: %s\n", numJugador);
-        printf("\nModo activado: %s\n\n", modoActivo);
-        printf("MENU DEL PROGRAMA\n\n");
+        printf("\nModo activo: %s\n\n", modoActivo);
+        printf("\t\tMENU DEL PROGRAMA\n\n");
         printf("Opciones de navegacion:\n");
-        printf("1- Empezar partida\n");
-        printf("2- Configurar parametros\n");
-        printf("3- Autores\n");
-        printf("4- Ayuda\n");
-        printf("5- Salir\nElegir una opcion (1-5): ");
+        printf("   1- Empezar partida\n");
+        printf("   2- Configurar parametros\n");
+        printf("   3- Autores\n");
+        printf("   4- Ayuda\n");
+        printf("   5- Salir\n\nElegir una opcion (1-5)>: ");
         scanf("%d", &decisionMenu);
 
         if (decisionMenu == 1) // empezar partida
@@ -63,12 +63,12 @@ int main()
 
             while (decisionParametros != 4)
             {
-                printf("\nCONFIGURAR PARAMETROS\n\n");
+                printf("\n\t\tCONFIGURAR PARAMETROS\n\n");
                 printf("Opciones de navegacion:\n");
-                printf("1- Modo Local\n");
-                printf("2- Modo Visita\n");
-                printf("3- Directorio de archivos\n");
-                printf("4- Ir atras\nElegir una opcion(1-4): ");
+                printf("   1- Modo Local\n");
+                printf("   2- Modo Visita\n");
+                printf("   3- Directorio de archivos\n");
+                printf("   4- Ir atras\n\nElegir una opcion(1-4)>: ");
                 scanf("%d", &decisionParametros);
 
                 if (decisionParametros == 1) // modo local
@@ -91,8 +91,8 @@ int main()
                     }
                     else
                     {
-                        printf("Para ingresar la ruta, el nombre del directorio no debe contener espacios\n");
-                        printf("\nIngrese el directorio de archivos de salida: ");
+                        printf("la ruta no debe tener espacios\n");
+                        printf("\n¿Cual es directorio de archivos de salida?>: ");
                         scanf("%s", direccion);
                         if (modoLocal == 1)
                         {
@@ -106,11 +106,20 @@ int main()
                         /* validacion de la direccion del archivo*/
                         while (registro == NULL)
                         {
-                            printf("\nError!!!! Por favor ingrese una carpeta y archivo de texto existente\n ");
+                            printf("\nError!!!! Por favor ingrese una carpeta existente\n ");
                             printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
                             scanf("%s", direccion);
+                            if (modoLocal == 1)
+                            {
+                                strcat(direccion, "std_servidor_grupo_7.txt");
+                            }
+                            else if (modoVisita == 1)
+                            {
+                                strcat(direccion, "std_cliente_grupo_7.txt");
+                            }
                             registro = fopen(direccion, "w");
                         }
+                        
                     }
                 }
                 else if (decisionParametros == 4) // ir atras
@@ -137,7 +146,7 @@ int main()
             printf("\nAntes de comenzar la partida usted debe hacer: \n");
             printf("1) Elegir si va a jugar como Local o Visitante \n");
             printf("Para cambiar esos valores vaya a Configuracion de parametros \n");
-            printf("2) Indicar la ruta y el nombre del archivo txt \n");
+            printf("2) Indicar la ruta para el registro\n");
             printf("Para cambiar esos valores vaya a Configuracion de parametros \n\n");
             printf("Para comenzar la partida seleccione Empezar partida luego de completar los pasos anteriores\n\n");
             system("pause");

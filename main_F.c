@@ -406,7 +406,6 @@ int conOrientacion(int A[10][10], int x, int y, int buscar)
         int indexC = 0;
         while (indexC + y < 10)
         {
-            // printf("\nbuscando....%d (%d,%d)",A[x+indexF][abs(y-indexC)],x+indexF,abs(y-indexC));
             if (A[x + indexF][abs(y - indexC)] == buscar)
             {
                 float dist = sqrt(pow((x) - (x + indexF), 2) + pow((y)-abs(y - indexC), 2));
@@ -424,7 +423,6 @@ int conOrientacion(int A[10][10], int x, int y, int buscar)
                         }
                         y_buscada++;
                     }
-
                     x_buscada++;
                 }
             }
@@ -479,23 +477,6 @@ int validarPosicion(int tablero[10][10], int posicionFila, int posicionCol, int 
     {
         return 0;
     }
-}
-
-// comprobar si el tablero coincide con la posicion que agrego y viceversa
-int validarJugada(int original[10][10], int nuevo[10][10], int x, int y, int jugador)
-{
-    original[x][y] = jugador;
-    for (int i = 0; i < 10; i++)
-    {
-        for (int j = 0; j < 10; j++)
-        {
-            if (original[i][j] != nuevo[i][j])
-            {
-                return 0;
-            }
-        }
-    }
-    return 1;
 }
 
 int seFormoCuadrado(int A[10][10], int buscar)
@@ -572,7 +553,6 @@ int verificarMensaje(char mensaje[], char *incorrecto)
         }
         if (b == 0)
         {
-            // printf("\n%c",mensaje[i]);
             *incorrecto = mensaje[i];
             return 1;
         }
@@ -639,13 +619,13 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
 
     if (modoLocal)
     {
-        strcpy(programa, "servidor;");
+        strcpy(programa, "servidor");
         us = 1;
         contrario = 2;
     }
     else
     {
-        strcpy(programa, "cliente;");
+        strcpy(programa, "cliente");
         us = 2;
         contrario = 1;
     }
@@ -654,15 +634,14 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
     {
         fprintf(registro, "######Programa:%s\n", programa);
     }
-
+    strcpy(programa,";");
     if (token != NULL)
     {
         while (token != NULL)
         {
-            //////
-            /*
-            Separamos el mensaje de acuerdo al valor de j
-            */
+
+            //Separamos el mensaje de acuerdo al valor de j
+
             if (j == 0) // id mensaje
             {
                 printf("Token: %s\n", token);
@@ -680,11 +659,12 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
                 printf("Token: %s\n", token);
                 fprintf(registro, "      Duracion:%s", token);
                 duracionEnviado = atoi(token);
-
                 if (duracionEnviado > 6)
                 {
                     tardoMucho = 1;
                 }
+                fprintf(registro,"\nMensaje-tipo: enviado.");
+
             }
             else if (j == 3) // programa
             {
@@ -694,19 +674,19 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             else if (j == 4) // origen
             {
                 printf("Token origen: %s\n", token);
-                fprintf(registro, "\nMensaje-origen:%s. ", token);
+                fprintf(registro, "      Mensaje-origen:%s.", token);
                 strcpy(origenEnviado, token);
             }
             else if (j == 5) // destino
             {
                 printf("Token destino: %s\n", token);
-                fprintf(registro, "Mensaje-destino:%s.\n", token);
+                fprintf(registro, "      Mensaje-destino:%s.\n", token);
                 strcpy(destinoEnviado, token);
             }
             else if (j == 6) // evento
             {
                 printf("Token evento: %s\n", token);
-                fprintf(registro, "Evento:%s. ", token);
+                fprintf(registro, "Evento:%s.", token);
                 if (strcmp(token, "jugar") == 0)
                 {
                     jugadasMio++;
@@ -716,7 +696,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             else if (j == 7) // estado
             {
                 printf("Token estado: %s\n", token);
-                fprintf(registro, "Estado-juego:%s.\n", token);
+                fprintf(registro, "      Estado-juego:%s.\n", token);
                 strcpy(estadoEnviado, token);
             }
             else if (j == 8) // jugada
@@ -727,12 +707,10 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
                 {
                     strcpy(inicioJuego, tiempoEnviado);
                 }
-                // fprintf(registro, "Numero-jugada:%s.**********\n", token);
             }
             else if (j == 9) // turno
             {
                 printf("Token: %s\n", token);
-                // fprintf(registro, "**********Turno-jugada:Jugador-%s. ", token);
                 fprintf(registro, "------------Turno-jugador:Jugador-%s. ", token);
                 fprintf(registro, "Numero-jugada:%s.------------\n", jugadas);
             }
@@ -791,9 +769,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
                         if (contador % 10 == 0) // para hacer el cambio de fila
                         {
                             auxi[0] = token[p];
-
                             matrizEnviada[fila][columna] = atoi(auxi) / 10;
-
                             fila++;
                             columna = 0;
                         }
@@ -920,7 +896,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         fprintf(registro, "Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
                 coordCuadrado[0], coordCuadrado[1], coordCuadrado[2], coordCuadrado[3], coordCuadrado[4],
                 coordCuadrado[5], coordCuadrado[6], coordCuadrado[7]);
-        //--------------------- */
+    
     }
     else if (strcmp(estadoEnviado, "finalizado fallido") == 0)
     {
@@ -1045,24 +1021,23 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     strcpy(origenEnviar, "7;");
     if (modoLocal)
     {
-        strcpy(programa, "cliente;");
+        strcpy(programa, "cliente");
         us = 1;
         contrario = 2;
     }
     else
     {
-        strcpy(programa, "servidor;");
+        strcpy(programa, "servidor");
         us = 2;
         contrario = 1;
     }
 
     fprintf(registro, "######Programa:%s\n", programa);
-
+    strcpy(programa,";");
     if (token != NULL)
     {
         while (token != NULL)
         {
-            //////
             /*
             Separamos el mensaje de acuerdo al valor de j
             */
@@ -1089,6 +1064,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                 printf("Token: %s\n", token);
                 fprintf(registro, "      Duracion:%s", token);
                 duracionRecibido = atoi(token);
+                fprintf(registro,"\nMensaje-tipo: recibido.");
             }
             else if (j == 3) // programa
             {
@@ -1097,7 +1073,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (j == 4) // origen
             {
                 printf("Token origen: %s\n", token);
-                fprintf(registro, "\nMensaje-origen:%s. ", token);
+                fprintf(registro, "     Mensaje-origen:%s. ", token);
 
                 strcpy(destinoEnviar, token);
                 strcat(destinoEnviar, ";");
@@ -1105,19 +1081,19 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (j == 5) // destino
             {
                 printf("Token destino: %s\n", token);
-                fprintf(registro, "Mensaje-destino:%s.\n", token);
+                fprintf(registro, "     Mensaje-destino:%s.\n", token);
             }
             else if (j == 6) // evento
             {
                 printf("Token evento: %s\n", token);
-                fprintf(registro, "Evento:%s. ", token);
+                fprintf(registro, "Evento:%s.", token);
 
                 strcpy(eventoRecibido, token);
             }
             else if (j == 7) // estado
             {
                 printf("Token estado: %s\n", token);
-                fprintf(registro, "Estado-juego:%s.\n", token);
+                fprintf(registro, "     Estado-juego:%s.\n", token);
 
                 strcpy(estadoRecibido, token);
             }
@@ -1411,14 +1387,12 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     }
     else if (strcmp(estadoRecibido, "activo") == 0 && strcmp(eventoRecibido, "jugar") == 0 && tardoMucho == 0 && mensajeValido && jugadaTrampa == 0)
     {
-
         int fila = 0, columna = 0, p = 0, contador = 1;
         char auxi[1];
         int matriz[10][10];
 
         while (p < strlen(tableroRecibido))
         {
-
             if (contador % 10 == 0) // para hacer el cambio de fila
             {
                 auxi[0] = tableroRecibido[p];
@@ -1450,15 +1424,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             printf("\n");
         }
-
-        /*
-        if (validarJugada(matriz,tableroRecibido,xRecibido,yRecibido,contrario)!=0);
-        {
-            int xNuevo= atoi(xRecibido);
-            int yNuevo= atoi(yRecibido);
-            matriz[xNuevo][yNuevo]=contrario;
-        }
-        */
         // cargamos datos del contrario
         jugadasContrario++;
         duracionContrario += duracionRecibido;
@@ -1466,7 +1431,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         int seFormo_contrario = seFormoCuadrado(matriz, contrario);
         int seFormo_nosotros = seFormoCuadrado(matriz, us);
         int t_lleno = 1, row = 0;
-        while (row < 10 || t_lleno != 0)
+        while (row < 10 || t_lleno != 0)    //verificamos si el tablero está lleno
         {
             int col = 0;
             while (col < 10 || t_lleno != 0)
@@ -1492,15 +1457,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                 int i = rand() % 10, j = rand() % 10;
 
                 int resultado = 0;
-                // int resultadoContrario = 0;
-
                 // hay que validar que la posicion no tenga elemento
                 if (matriz[i][j] == 0)
                 {
-
                     // verificarmos si se forma un cuadrado para nosotros
                     resultado = validarPosicion(matriz, i, j, us);
-
                     // si no se forma para ninguno, colocamos nuestro valor
                     if (!resultado)
                     {
@@ -1576,14 +1537,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             time_t t;
             struct tm *tm;
             char hora[100];
-
             t = time(NULL);
             tm = localtime(&t);
             strftime(hora, 100, "%H:%M:%S", tm);
-
             int tiempoEnviar = marcaServidor(hora);
             int duracionSegundos = tiempoEnviar - tiempoRecibido;
-
             itoa(duracionSegundos, duracion, 10);
             strcat(duracion, ";");
             strcat(hora, ";");
@@ -1612,14 +1570,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             time_t t;
             struct tm *tm;
             char hora[100];
-
             t = time(NULL);
             tm = localtime(&t);
             strftime(hora, 100, "%H:%M:%S", tm);
-
             int tiempoEnviar = marcaServidor(hora);
             int duracionSegundos = tiempoEnviar - tiempoRecibido;
-
             itoa(duracionSegundos, duracion, 10);
             strcat(duracion, ";");
             strcat(hora, ";");
@@ -1656,14 +1611,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             time_t t;
             struct tm *tm;
             char hora[100];
-
             t = time(NULL);
             tm = localtime(&t);
             strftime(hora, 100, "%H:%M:%S", tm);
-
             int tiempoEnviar = marcaServidor(hora);
             int duracionSegundos = tiempoEnviar - tiempoRecibido;
-
             itoa(duracionSegundos, duracion, 10);
             strcat(duracion, ";");
             strcat(hora, ";");
@@ -1702,11 +1654,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     {
         if (strcmp(estadoRecibido, "finalizado exitoso") == 0)
         {
-            int fila = 0, columna = 0, p = 0, contador = 1;
+            int fila = 0, columna = 0, p = 1, contador = 1;
             char auxi[1];
             int tablero[10][10];
-            printf("\npruebaa %s\n", copiaTablero);
-            while (p < strlen(copiaTablero))
+           
+            while (p < strlen(copiaTablero)-5)
             {
 
                 if (contador % 10 == 0) // para hacer el cambio de fila
@@ -1949,14 +1901,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         time_t t;
         struct tm *tm;
         char hora[100];
-
         t = time(NULL);
         tm = localtime(&t);
         strftime(hora, 100, "%H:%M:%S", tm);
-
         int tiempoEnviar = marcaServidor(hora);
         int duracionSegundos = tiempoEnviar - tiempoRecibido;
-
         itoa(duracionSegundos, duracion, 10);
         strcat(duracion, ";");
         strcat(hora, ";");
