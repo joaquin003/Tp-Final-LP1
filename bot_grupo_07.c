@@ -1,4 +1,20 @@
-#include "main.h"
+/*
+ * UNIVERSIDAD NACIONAL DE ASUNCION
+ * Facultad Politécnica – Ingeniería en Informática
+ * Lenguaje de Programación I – Año 2022
+ *
+ *Descripción: Este trabajo práctico realizado será evaluado como el examen final de la asignatura.
+ *
+ *@autor/es: Joaquin Manuel Uliambre Frutos (Cedula de identidad: 5.360.716) y
+            Zinri Alice Bobadilla Peralta (Cedula de identidad: 5.360.716)
+ *@id-grupo: 7
+ *@versión: 2.7
+ *@fecha y hora última actualización: lunes, 19 de diciembre de 2022 20:00
+ */
+
+// Para compilar el programa usar la siguiente línea: gcc bot_grupo_07.c func_grupo_07.c -o bot -lws2_32
+
+#include "func_grupo_07.h"
 
 int main()
 {
@@ -119,7 +135,7 @@ int main()
                             }
                             registro = fopen(direccion, "w");
                         }
-                                        }
+                    }
                 }
                 else if (decisionParametros == 4) // ir atras
                 {
