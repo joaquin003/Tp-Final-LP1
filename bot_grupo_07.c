@@ -26,9 +26,6 @@ int main()
     char numJugador[100];
     FILE *registro;
     SOCKET recibe;
-    // printf("ingrese la direccion y el nombre para el registro.txt\n----> ");
-    // scanf("%s", direccion);
-    // registro = fopen(direccion, "w"); // guarda el archivo en la direccion y con el nombre que el usuario desea
     registro = fopen(direccion, "w");
     while (decisionMenu != 5)
     {
