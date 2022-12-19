@@ -144,6 +144,15 @@ void socketServidor(FILE *registro, int modoLocal)
     printf("Shutting down. \nGood night.\n");
 }
 
+void horaActual(char *hora)
+{
+    time_t t;
+    struct tm *tm;
+    t = time(NULL);
+    tm = localtime(&t);
+    strftime(hora, 100, "%H:%M:%S", tm);
+}
+
 void socketCliente(FILE *registro, int modoLocal)
 {
     int res;
@@ -188,14 +197,8 @@ void socketCliente(FILE *registro, int modoLocal)
         char mensaje[1000] = "";
         strcat(mensaje, "1;");
         // hora en que vamos a enviar el mensaje
-        time_t t;
-        struct tm *tm;
         char hora[100];
-
-        t = time(NULL);
-        tm = localtime(&t);
-        strftime(hora, 100, "%H:%M:%S", tm);
-
+        horaActual(hora);
         strcat(hora, ";");
         strcat(mensaje, hora);
         strcat(mensaje, "*;cliente;7;*;conectar;pendiente;*;*;*;*;*;#.");
@@ -1204,14 +1207,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         strcpy(tableroEnviar, "*;");
 
         // hora en que vamos a enviar el mensaje
-        time_t t;
-        struct tm *tm;
         char hora[100];
-
-        t = time(NULL);
-        tm = localtime(&t);
-        strftime(hora, 100, "%H:%M:%S", tm);
-
+        horaActual(hora);
         int tiempoEnviar = marcaServidor(hora);
         int duracionSegundos = tiempoEnviar - tiempoRecibido;
 
@@ -1245,14 +1242,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         strcpy(tableroEnviar, "*;");
 
         // hora en que vamos a enviar el mensaje
-        time_t t;
-        struct tm *tm;
         char hora[100];
-
-        t = time(NULL);
-        tm = localtime(&t);
-        strftime(hora, 100, "%H:%M:%S", tm);
-
+        horaActual(hora);
         int tiempoEnviar = marcaServidor(hora);
         int duracionSegundos = tiempoEnviar - tiempoRecibido;
 
@@ -1355,14 +1346,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         strcat(tableroEnviar, ";");
 
         // hora en que vamos a enviar el mensaje
-        time_t t;
-        struct tm *tm;
         char hora[100];
-
-        t = time(NULL);
-        tm = localtime(&t);
-        strftime(hora, 100, "%H:%M:%S", tm);
-
+        horaActual(hora);
         int tiempoEnviar = marcaServidor(hora);
         int duracionSegundos = tiempoEnviar - tiempoRecibido;
 
@@ -1534,12 +1519,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             strcat(turnoEnviar, ";");
 
             // hora en que vamos a enviar el mensaje
-            time_t t;
-            struct tm *tm;
             char hora[100];
-            t = time(NULL);
-            tm = localtime(&t);
-            strftime(hora, 100, "%H:%M:%S", tm);
+            horaActual(hora);
             int tiempoEnviar = marcaServidor(hora);
             int duracionSegundos = tiempoEnviar - tiempoRecibido;
             itoa(duracionSegundos, duracion, 10);
@@ -1567,12 +1548,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             printf("\nperdio contrario\n");
 
             // hora en que vamos a enviar el mensaje
-            time_t t;
-            struct tm *tm;
             char hora[100];
-            t = time(NULL);
-            tm = localtime(&t);
-            strftime(hora, 100, "%H:%M:%S", tm);
+            horaActual(hora);
             int tiempoEnviar = marcaServidor(hora);
             int duracionSegundos = tiempoEnviar - tiempoRecibido;
             itoa(duracionSegundos, duracion, 10);
@@ -1608,12 +1585,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             printf("\ngano contrario\n");
 
             // hora en que vamos a enviar el mensaje
-            time_t t;
-            struct tm *tm;
             char hora[100];
-            t = time(NULL);
-            tm = localtime(&t);
-            strftime(hora, 100, "%H:%M:%S", tm);
+            horaActual(hora);
             int tiempoEnviar = marcaServidor(hora);
             int duracionSegundos = tiempoEnviar - tiempoRecibido;
             itoa(duracionSegundos, duracion, 10);
@@ -1900,12 +1873,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     else if (tardoMucho == 1 || mensajeValido == 0 || jugadaTrampa == 1)
     {
         // hora en que vamos a enviar el mensaje
-        time_t t;
-        struct tm *tm;
         char hora[100];
-        t = time(NULL);
-        tm = localtime(&t);
-        strftime(hora, 100, "%H:%M:%S", tm);
+        horaActual(hora);
         int tiempoEnviar = marcaServidor(hora);
         int duracionSegundos = tiempoEnviar - tiempoRecibido;
         itoa(duracionSegundos, duracion, 10);

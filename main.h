@@ -21,6 +21,7 @@
 #define MAX_CLIENTS 1
 
 void socketServidor(FILE *registro, int modoLocal);
+void horaActual(char *hora);
 void socketCliente(FILE *registro, int modoLocal);
 int seFormoCuadrado(int A[10][10], int buscar);
 int cantVacias(int A[10][10]);
