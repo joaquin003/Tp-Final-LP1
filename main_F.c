@@ -634,13 +634,13 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
     {
         fprintf(registro, "######Programa:%s\n", programa);
     }
-    strcpy(programa,";");
+    strcpy(programa, ";");
     if (token != NULL)
     {
         while (token != NULL)
         {
 
-            //Separamos el mensaje de acuerdo al valor de j
+            // Separamos el mensaje de acuerdo al valor de j
 
             if (j == 0) // id mensaje
             {
@@ -663,8 +663,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
                 {
                     tardoMucho = 1;
                 }
-                fprintf(registro,"\nMensaje-tipo: enviado.");
-
+                fprintf(registro, "\nMensaje-tipo: enviado.");
             }
             else if (j == 3) // programa
             {
@@ -896,7 +895,6 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         fprintf(registro, "Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
                 coordCuadrado[0], coordCuadrado[1], coordCuadrado[2], coordCuadrado[3], coordCuadrado[4],
                 coordCuadrado[5], coordCuadrado[6], coordCuadrado[7]);
-    
     }
     else if (strcmp(estadoEnviado, "finalizado fallido") == 0)
     {
@@ -923,6 +921,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         else if (mensajeValido == 0)
         {
             printf("Motivo error: Caracter invalido en mensaje\n");
+            printf("Mensaje recibido: %s\n", mensaje);
         }
         else if (jugadaTrampa)
         {
@@ -969,6 +968,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         else if (mensajeValido == 0)
         {
             fprintf(registro, "Motivo error: Caracter invalido en mensaje\n");
+            fprintf(registro, "Mensaje recibido: %s\n", mensaje);
         }
         else if (jugadaTrampa)
         {
@@ -1033,7 +1033,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     }
 
     fprintf(registro, "######Programa:%s\n", programa);
-    strcpy(programa,";");
+    strcpy(programa, ";");
     if (token != NULL)
     {
         while (token != NULL)
@@ -1064,7 +1064,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                 printf("Token: %s\n", token);
                 fprintf(registro, "      Duracion:%s", token);
                 duracionRecibido = atoi(token);
-                fprintf(registro,"\nMensaje-tipo: recibido.");
+                fprintf(registro, "\nMensaje-tipo: recibido.");
             }
             else if (j == 3) // programa
             {
@@ -1431,7 +1431,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         int seFormo_contrario = seFormoCuadrado(matriz, contrario);
         int seFormo_nosotros = seFormoCuadrado(matriz, us);
         int t_lleno = 1, row = 0;
-        while (row < 10 || t_lleno != 0)    //verificamos si el tablero está lleno
+        while (row < 10 || t_lleno != 0) // verificamos si el tablero está lleno
         {
             int col = 0;
             while (col < 10 || t_lleno != 0)
@@ -1657,8 +1657,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             int fila = 0, columna = 0, p = 1, contador = 1;
             char auxi[1];
             int tablero[10][10];
-           
-            while (p < strlen(copiaTablero)-5)
+
+            while (p < strlen(copiaTablero) - 5)
             {
 
                 if (contador % 10 == 0) // para hacer el cambio de fila
@@ -1840,6 +1840,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (mensajeValido == 0)
             {
                 printf("Motivo error: Caracter invalido en mensaje\n");
+                printf("Mensaje recibido: %s\n", mensaje);
             }
             else
             {
@@ -1886,6 +1887,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else if (mensajeValido == 0)
             {
                 fprintf(registro, "Motivo error: Caracter invalido en mensaje\n");
+                fprintf(registro, "Mensaje recibido: %s\n", mensaje);
             }
             else
             {

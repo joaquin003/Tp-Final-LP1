@@ -92,7 +92,7 @@ int main()
                     else
                     {
                         printf("la ruta no debe tener espacios\n");
-                        printf("\n¿Cual es directorio de archivos de salida?>: ");
+                        printf("\nCual es directorio de archivos de salida?>: ");
                         scanf("%s", direccion);
                         if (modoLocal == 1)
                         {
@@ -119,8 +119,7 @@ int main()
                             }
                             registro = fopen(direccion, "w");
                         }
-                        
-                    }
+                                        }
                 }
                 else if (decisionParametros == 4) // ir atras
                 {
