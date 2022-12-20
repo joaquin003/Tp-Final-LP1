@@ -102,6 +102,9 @@ void socketServidor(FILE *registro, int modoLocal)
         closesocket(listener);
         WSACleanup();
     }
+    {
+        running = 1;
+    }
 
     // get client information
     getpeername(client, (struct sockaddr *)&clientAddr, (socklen_t *)&clientAddr);
@@ -122,6 +125,11 @@ void socketServidor(FILE *registro, int modoLocal)
             char respuesta[1000];
             leer_mensaje(registro, recvbuf, respuesta, modoLocal);
             enviarMensaje(&client, respuesta, registro, modoLocal);
+
+            if (running == 0)
+            {
+                break;
+            }
         }
         else if (!res)
         {
@@ -925,6 +933,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
                     coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
                     coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
         }
+        running = 0;
     }
     else if (strcmp(estadoEnviado, "finalizado fallido") == 0)
     {
@@ -964,6 +973,7 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         {
             fprintf(registro, "Motivo error: Se encontro trampa en la jugada\n");
         }
+        running = 0;
     }
 }
 
