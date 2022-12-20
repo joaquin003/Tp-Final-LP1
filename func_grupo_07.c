@@ -1250,31 +1250,12 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
         }
         // posicion en donde haremos la jugada
-        int ban = 0;
+        int i = rand() % 10, j = rand() % 10;
 
-        while (ban != 1)
-        {
-            int i = rand() % 10, j = rand() % 10;
-
-            int resultado = 0;
-
-            // hay que validar que la posicion no tenga elemento
-            if (matriz[i][j] == 0)
-            {
-                // verificarmos si se forma un cuadrado para nosotros
-                resultado = validarPosicion(matriz, i, j, us);
-
-                // si no se forma para ninguno, colocamos nuestro valor
-                if (!resultado)
-                {
-                    matriz[i][j] = us;
-                    // agregamos las posiciones a nuestras variables para luego enviar el mensaje
-                    itoa((i + 1), xEnviar, 10);
-                    itoa((j + 1), yEnviar, 10);
-                    ban = 1;
-                }
-            }
-        }
+        matriz[i][j] = us;
+        // agregamos las posiciones a nuestras variables para luego enviar el mensaje
+        itoa((i + 1), xEnviar, 10);
+        itoa((j + 1), yEnviar, 10);
 
         // cargamos al tablero nuevo para luego agregarlo a la respuesta
         tableroEnviar[0] = '[';
