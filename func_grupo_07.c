@@ -411,82 +411,78 @@ int conOrientacion(int A[10][10], int x, int y, int buscar)
     int seFormaCuadrado = 0;
     int indexF = 1;
     int x_buscada = 0, y_buscada = 0;
-    if (A[x][y] == buscar)
+    while (indexF + x < 10)
     {
-        while (indexF + x < 10)
+        int indexC = 0;
+        while (indexC + y < 10)
         {
-            int indexC = 0;
-            while (indexC + y < 10)
+            if (A[x + indexF][y - indexC] == buscar && y - indexC >= 0)
             {
-                if (A[x + indexF][y - indexC] == buscar && y - indexC >= 0)
+                float lado = sqrt(pow((x) - (x + indexF), 2) + pow((y) - (y - indexC), 2));
+                float diagonal = lado * sqrt(2);
+                // en busqueda de la 3ra posicion q cumpla
+                /*FORMULA----------> dis = raiz de (x_buscada - x)**2 + (y_buscada - y)**2 */
+                int auxX = 0, auxY = 0, termino = 0;
+                while (auxX < 10 || termino < 0)
                 {
-                    float lado = sqrt(pow((x) - (x + indexF), 2) + pow((y) - (y - indexC), 2));
-                    float diagonal = lado * sqrt(2);
-                    // en busqueda de la 3ra posicion q cumpla
-                    /*FORMULA----------> dis = raiz de (x_buscada - x)**2 + (y_buscada - y)**2 */
-                    int auxX = 0, auxY = 0, termino = 0;
-                    while (auxX < 10 || termino < 0)
+                    auxY = 0;
+                    while (auxY < 10 || termino < 0)
                     {
-                        auxY = 0;
-                        while (auxY < 10 || termino < 0)
+                        float val = sqrt(pow(auxX - (x + indexF), 2) + pow(auxY - (y - indexC), 2));
+                        if (diagonal == val && A[auxX][auxY] == buscar)
                         {
-                            float val = sqrt(pow(auxX - (x + indexF), 2) + pow(auxY - (y - indexC), 2));
-                            if (diagonal == val && A[auxX][auxY] == buscar)
+                            float lado2 = sqrt(pow((x) - (auxX), 2) + pow((y) - (auxY), 2));
+                            if (lado == lado2)
                             {
-                                float lado2 = sqrt(pow((x) - (auxX), 2) + pow((y) - (auxY), 2));
-                                if (lado == lado2)
-                                {
-                                    x_buscada = auxX;
-                                    y_buscada = auxY;
-                                    termino = 1;
-                                }
+                                x_buscada = auxX;
+                                y_buscada = auxY;
+                                termino = 1;
                             }
-                            auxY++;
                         }
-                        auxX++;
+                        auxY++;
                     }
+                    auxX++;
+                }
 
-                    int f = 0;
-                    while (x + f < 10)
+                int f = 0;
+                while (x + f < 10)
+                {
+                    int c = 0;
+                    while (y + c < 10)
                     {
-                        int c = 0;
-                        while (y + c < 10)
+                        float val2 = sqrt(pow((x + f) - x, 2) + pow((y + c) - y, 2));
+                        float lado3 = sqrt(pow((x + f) - (x + indexF), 2) + pow((y + c) - (y - indexC), 2));
+                        float lado4 = sqrt(pow((x + f) - (x_buscada), 2) + pow((y + c) - (y_buscada), 2));
+                        if (A[x + f][y + c] == buscar && x + f < 10 && y + c < 10 && diagonal == val2 && lado == lado3 && lado == lado4)
                         {
-                            float val2 = sqrt(pow((x + f) - x, 2) + pow((y + c) - y, 2));
-                            float lado3 = sqrt(pow((x + f) - (x + indexF), 2) + pow((y + c) - (y - indexC), 2));
-                            float lado4 = sqrt(pow((x + f) - (x_buscada), 2) + pow((y + c) - (y_buscada), 2));
-                            if (A[x + f][y + c] == buscar && x + f < 10 && y + c < 10 && diagonal == val2 && lado == lado3 && lado == lado4)
+                            if (((x + f) == x + indexF && (y + c) != y - indexC) || ((x + f) != x + indexF && (y + c) == y - indexC) || ((x + f) != x + indexF && (y + c) != y - indexC))
                             {
-                                if (((x + f) == x + indexF && (y + c) != y - indexC) || ((x + f) != x + indexF && (y + c) == y - indexC) || ((x + f) != x + indexF && (y + c) != y - indexC))
+                                if (((x + f == x_buscada) && (y + c) != y_buscada) || ((x + f != x_buscada) && (y + c) == y_buscada) || ((x + f) != x + indexF && (y + c) != y - indexC))
                                 {
-                                    if (((x + f == x_buscada) && (y + c) != y_buscada) || ((x + f != x_buscada) && (y + c) == y_buscada) || ((x + f) != x + indexF && (y + c) != y - indexC))
+                                    if (((x + f == x) && (y + c) != y) || ((x + f != x) && (y + c) == y) || ((x + f) != x && (y + c) != y))
                                     {
-                                        if (((x + f == x) && (y + c) != y) || ((x + f != x) && (y + c) == y) || ((x + f) != x && (y + c) != y))
-                                        {
-                                            coordCuadrado[0] = x;
-                                            coordCuadrado[1] = y;
-                                            coordCuadrado[2] = x + indexF;
-                                            coordCuadrado[3] = y - indexC;
-                                            coordCuadrado[4] = x_buscada;
-                                            coordCuadrado[5] = y_buscada;
-                                            coordCuadrado[6] = x + f;
-                                            coordCuadrado[7] = y + c;
-                                            seFormaCuadrado = 1;
-                                        }
+                                        coordCuadrado[0] = x;
+                                        coordCuadrado[1] = y;
+                                        coordCuadrado[2] = x + indexF;
+                                        coordCuadrado[3] = y - indexC;
+                                        coordCuadrado[4] = x_buscada;
+                                        coordCuadrado[5] = y_buscada;
+                                        coordCuadrado[6] = x + f;
+                                        coordCuadrado[7] = y + c;
+                                        seFormaCuadrado = 1;
                                     }
                                 }
                             }
-                            c++;
                         }
-                        f++;
+                        c++;
                     }
+                    f++;
                 }
-                indexC++;
             }
-            indexF++;
+            indexC++;
         }
+        indexF++;
     }
-
     return seFormaCuadrado;
 }
 
@@ -906,8 +902,8 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         printf("Fin juego: %s\n", tiempoEnviado);
         printf("Duracion total: %d\n", duracionMio + duracionContrario);
         printf("Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
-               coordCuadrado[0], coordCuadrado[1], coordCuadrado[2], coordCuadrado[3], coordCuadrado[4],
-               coordCuadrado[5], coordCuadrado[6], coordCuadrado[7]);
+               coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
+               coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
         printf("\n");
 
         // agregamos al archivo el mensaje final
@@ -961,8 +957,8 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         fprintf(registro, "Finalización del juego: %s\n", tiempoEnviado);
         fprintf(registro, "Duracion-total-del-juego: %d\n", duracionMio + duracionContrario);
         fprintf(registro, "Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
-                coordCuadrado[0], coordCuadrado[1], coordCuadrado[2], coordCuadrado[3], coordCuadrado[4],
-                coordCuadrado[5], coordCuadrado[6], coordCuadrado[7]);
+                coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
+                coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
     }
     else if (strcmp(estadoEnviado, "finalizado fallido") == 0)
     {
@@ -1373,8 +1369,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                 {
                     matriz[i][j] = us;
                     // agregamos las posiciones a nuestras variables para luego enviar el mensaje
-                    itoa(i, xEnviar, 10);
-                    itoa(j, yEnviar, 10);
+                    itoa((i + 1), xEnviar, 10);
+                    itoa((j + 1), yEnviar, 10);
                     ban = 1;
                 }
             }
@@ -1438,14 +1434,14 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         int fila = 0, columna = 0, p = 0, contador = 1;
         char auxi[1];
         int matriz[10][10];
-
+        printf("\n soy %s\n", tableroRecibido);
         while (p < strlen(tableroRecibido))
         {
             if (contador % 10 == 0) // para hacer el cambio de fila
             {
                 auxi[0] = tableroRecibido[p];
-
-                matriz[fila][columna] = atoi(auxi) / 10;
+                auxi[1] = '\0';
+                matriz[fila][columna] = atoi(auxi);
 
                 fila++;
                 columna = 0;
@@ -1453,15 +1449,13 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             else
             {
                 auxi[0] = tableroRecibido[p];
-
-                matriz[fila][columna] = atoi(auxi) / 10;
+                auxi[1] = '\0';
+                matriz[fila][columna] = atoi(auxi);
                 columna++;
             }
             p = p + 2;
             contador++;
         }
-        // verificar si hay trampa
-        verificarMatrices(matrizEnviada, matriz, atoi(xRecibido), atoi(yRecibido));
         // imprimir datos de matriz
         for (int fila = 0; fila < 10; fila++)
         {
@@ -1471,6 +1465,10 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             printf("\n");
         }
+
+        // verificar si hay trampa
+        verificarMatrices(matrizEnviada, matriz, atoi(xRecibido) - 1, atoi(yRecibido) - 1);
+
         // cargamos datos del contrario
         jugadasContrario++;
         duracionContrario += duracionRecibido;
@@ -1514,8 +1512,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                     {
                         matriz[i][j] = us;
                         // agregamos las posiciones a nuestras variables para luego enviar el mensaje
-                        itoa(i, xEnviar, 10);
-                        itoa(j, yEnviar, 10);
+                        itoa((i + 1), xEnviar, 10);
+                        itoa((j + 1), yEnviar, 10);
                         ban = 1;
                         validador = 1;
                     }
@@ -1538,8 +1536,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                         {
                             matriz[i][j] = us;
                             coloco = 1;
-                            itoa(i, xEnviar, 10);
-                            itoa(j, yEnviar, 10);
+                            itoa((i + 1), xEnviar, 10);
+                            itoa((j + 1), yEnviar, 10);
                         }
                     }
                 }
@@ -1737,8 +1735,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             printf("Fin de juego: %s\n", tiempRecibidoStr);
             printf("Duracion total: %d\n", duracionMio + duracionContrario);
             printf("Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
-                   coordCuadrado[0], coordCuadrado[1], coordCuadrado[2], coordCuadrado[3], coordCuadrado[4],
-                   coordCuadrado[5], coordCuadrado[6], coordCuadrado[7]);
+                   coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
+                   coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
             printf("\n");
 
             // agregamos al archivo el mensaje final
@@ -1792,8 +1790,8 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             fprintf(registro, "Finalización del juego: %s\n", tiempRecibidoStr);
             fprintf(registro, "Duracion-total-del-juego: %d\n", duracionMio + duracionContrario);
             fprintf(registro, "Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
-                    coordCuadrado[0], coordCuadrado[1], coordCuadrado[2], coordCuadrado[3], coordCuadrado[4],
-                    coordCuadrado[5], coordCuadrado[6], coordCuadrado[7]);
+                    coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
+                    coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
             //--------------------- */
         }
         else
