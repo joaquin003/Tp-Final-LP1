@@ -26,12 +26,14 @@ int duracionContrario = 0;
 char inicioJuego[20];
 char finJuego[20];
 int matrizEnviada[10][10];
+int finalizadoLleno = 0;
 
 //  motivos de fallido
 int tardoMucho = 0;
 int mensajeValido = 1;
 int jugadaTrampa = 0;
 char msjInvalido[300];
+
 // variables del cuadrado formado
 int coordCuadrado[8];
 
@@ -855,16 +857,25 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
     if (strcmp(estadoEnviado, "finalizado exitoso") == 0)
     {
         printf("\n====================fin del juego====================\n");
-        printf("Grupo Ganador: 7\n");
-        if (strcmp(programa, "servidor;") == 0)
+        if (finalizadoLleno)
         {
-            printf("Jugador ganador: %s\n", "jugador 1");
-            printf("Modalidad ganadora: %s\n", "Local");
+            printf("Grupo Ganador: 7 y %s\n", destinoEnviado);
+            printf("Jugador ganador: %s\n", "jugador 1 y jugador 2");
+            printf("Modalidad ganadora: %s\n", "Local y Visita");
         }
         else
         {
-            printf("Jugador ganador: %s\n", "jugador 2");
-            printf("Modalidad ganadora: %s\n", "Visita");
+            printf("Grupo Ganador: 7\n");
+            if (strcmp(programa, "servidor;") == 0)
+            {
+                printf("Jugador ganador: %s\n", "jugador 1");
+                printf("Modalidad ganadora: %s\n", "Local");
+            }
+            else
+            {
+                printf("Jugador ganador: %s\n", "jugador 2");
+                printf("Modalidad ganadora: %s\n", "Visita");
+            }
         }
 
         if (modoLocal)
@@ -884,22 +895,34 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         printf("Inicio juego: %s\n", inicioJuego);
         printf("Fin juego: %s\n", tiempoEnviado);
         printf("Duracion total: %d\n", duracionMio + duracionContrario);
-        printf("Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
-               coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
-               coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
+        if (finalizadoLleno != 1)
+        {
+            printf("Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
+                   coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
+                   coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
+        }
         printf("\n");
         // agregamos al archivo el mensaje final
         fprintf(registro, "====================fin del juego====================\n");
-        fprintf(registro, "Grupo-ganador: 7\n");
-        if (strcmp(programa, "servidor;") == 0)
+        if (finalizadoLleno)
         {
-            fprintf(registro, "Jugador-ganador: Jugador 1\n");
-            fprintf(registro, "Modalidad-partida-ganada: Local\n");
+            fprintf(registro, "Grupo Ganador: 7 y %s\n", destinoEnviado);
+            fprintf(registro, "Jugador ganador: %s\n", "jugador 1 y jugador 2");
+            fprintf(registro, "Modalidad ganadora: %s\n", "Local y Visita");
         }
         else
         {
-            fprintf(registro, "Jugador-ganador: Jugador 2\n");
-            fprintf(registro, "Modalidad-partida-ganada: Visita\n");
+            fprintf(registro, "Grupo-ganador: 7\n");
+            if (strcmp(programa, "servidor;") == 0)
+            {
+                fprintf(registro, "Jugador-ganador: Jugador 1\n");
+                fprintf(registro, "Modalidad-partida-ganada: Local\n");
+            }
+            else
+            {
+                fprintf(registro, "Jugador-ganador: Jugador 2\n");
+                fprintf(registro, "Modalidad-partida-ganada: Visita\n");
+            }
         }
         if (modoLocal)
         {
@@ -918,9 +941,12 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
         fprintf(registro, "Inicio del juego: %s\n", inicioJuego);
         fprintf(registro, "Finalización del juego: %s\n", tiempoEnviado);
         fprintf(registro, "Duracion-total-del-juego: %d\n", duracionMio + duracionContrario);
-        fprintf(registro, "Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
-                coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
-                coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
+        if (finalizadoLleno != 1)
+        {
+            fprintf(registro, "Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
+                    coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
+                    coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
+        }
     }
     else if (strcmp(estadoEnviado, "finalizado fallido") == 0)
     {
@@ -1553,7 +1579,38 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         }
         else if (t_lleno == 1)
         {
-            printf("tablero lleno");
+            // hora en que vamos a enviar el mensaje
+            char hora[100];
+            horaActual(hora);
+            int tiempoEnviar = marcaServidor(hora);
+            int duracionSegundos = tiempoEnviar - tiempoRecibido;
+            itoa(duracionSegundos, duracion, 10);
+            strcat(duracion, ";");
+            strcat(hora, ";");
+            // concatenamos todos los nuevos datos a respuesta
+            strcpy(eventoEnviar, "finalizar;");
+            strcpy(estadoEnviar, "finalizado exitoso;");
+            strcpy(turnoEnviar, "*;");
+            strcpy(xEnviar, "*;");
+            strcpy(yEnviar, "*;");
+            strcpy(tableroEnviar, "*;");
+            strcpy(jugadaEnviar, "*;");
+
+            strcat(respuesta, nuevoId);
+            strcat(respuesta, hora);
+            strcat(respuesta, duracion);
+            strcat(respuesta, programa);
+            strcat(respuesta, origenEnviar);
+            strcat(respuesta, destinoEnviar);
+            strcat(respuesta, eventoEnviar);
+            strcat(respuesta, estadoEnviar);
+            strcat(respuesta, jugadaEnviar);
+            strcat(respuesta, turnoEnviar);
+            strcat(respuesta, xEnviar);
+            strcat(respuesta, yEnviar);
+            strcat(respuesta, tableroEnviar);
+            strcat(respuesta, "#.");
+            finalizadoLleno = 1;
             running = 0;
         }
     }
@@ -1561,21 +1618,29 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     {
         if (strcmp(estadoRecibido, "finalizado exitoso") == 0)
         {
-            printf("termino\n");
+            int seFor = seFormoCuadrado(matrizEnviada, us);
+            int seFor2 = seFormoCuadrado(matrizEnviada, contrario);
             printf("\n====================fin del juego====================\n");
-            printf("Grupo Ganador: %s\n", destinoEnviar);
-            if (strcmp(programa, "servidor;") == 0)
+            if (seFor == 0 && seFor2 == 0)
             {
-                printf("Jugador ganador: %s\n", "jugador 2");
-                printf("Modalidad ganadora: %s\n", "Visita");
+                printf("Grupo Ganador: 7 y %s\n", destinoEnviar);
+                printf("Jugador ganador: %s\n", "jugador 1 y jugador 2");
+                printf("Modalidad ganadora: %s\n", "Visita y Local");
             }
             else
             {
-                printf("Jugador ganador: %s\n", "jugador 1");
-                printf("Modalidad ganadora: %s\n", "Local");
+                printf("Grupo Ganador: %s\n", destinoEnviar);
+                if (strcmp(programa, "servidor;") == 0)
+                {
+                    printf("Jugador ganador: %s\n", "jugador 2");
+                    printf("Modalidad ganadora: %s\n", "Visita");
+                }
+                else
+                {
+                    printf("Jugador ganador: %s\n", "jugador 1");
+                    printf("Modalidad ganadora: %s\n", "Local");
+                }
             }
-            int seFor = seFormoCuadrado(matrizEnviada, us);
-            int seFor2 = seFormoCuadrado(matrizEnviada, contrario);
             if (modoLocal)
             {
                 printf("Total-jugadas-jugador1: %d\n", jugadasMio);
@@ -1593,24 +1658,36 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             printf("Inicio juego: %s\n", inicioJuego);
             printf("Fin de juego: %s\n", tiempRecibidoStr);
             printf("Duracion total: %d\n", duracionMio + duracionContrario);
-            printf("Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
-                   coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
-                   coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
+            if (seFor != 0 || seFor2 != 0)
+            {
+                printf("Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
+                       coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
+                       coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
+            }
             printf("\n");
 
             // agregamos al archivo el mensaje final
             fprintf(registro, "====================fin del juego====================\n");
             char *grupo = strtok(destinoEnviar, ";");
-            fprintf(registro, "Grupo-ganador: %s\n", grupo);
-            if (strcmp(programa, "servidor;") == 0)
+            if (seFor == 0 && seFor2 == 0)
             {
-                fprintf(registro, "Jugador-ganador: Jugador 2\n");
-                fprintf(registro, "Modalidad-partida-ganada: Visita\n");
+                fprintf(registro, "Grupo-ganador: 7 y %s\n", grupo);
+                fprintf(registro, "Jugador-ganador: Jugador 1 y Jugado 2\n");
+                fprintf(registro, "Modalidad-partida-ganada: Visita y Local\n");
             }
             else
             {
-                fprintf(registro, "Jugador-ganador: Jugador 1\n");
-                fprintf(registro, "Modalidad-partida-ganada: Local\n");
+                fprintf(registro, "Grupo-ganador: %s\n", grupo);
+                if (strcmp(programa, "servidor;") == 0)
+                {
+                    fprintf(registro, "Jugador-ganador: Jugador 2\n");
+                    fprintf(registro, "Modalidad-partida-ganada: Visita\n");
+                }
+                else
+                {
+                    fprintf(registro, "Jugador-ganador: Jugador 1\n");
+                    fprintf(registro, "Modalidad-partida-ganada: Local\n");
+                }
             }
             if (modoLocal)
             {
@@ -1629,9 +1706,12 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             fprintf(registro, "Inicio del juego: %s\n", inicioJuego);
             fprintf(registro, "Finalización del juego: %s\n", tiempRecibidoStr);
             fprintf(registro, "Duracion-total-del-juego: %d\n", duracionMio + duracionContrario);
-            fprintf(registro, "Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
-                    coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
-                    coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
+            if (seFor != 0 || seFor2 != 0)
+            {
+                fprintf(registro, "Coordenadas del cuadrado: (%d,%d);(%d,%d);(%d,%d);(%d,%d)\n",
+                        coordCuadrado[0] + 1, coordCuadrado[1] + 1, coordCuadrado[2] + 1, coordCuadrado[3] + 1, coordCuadrado[4] + 1,
+                        coordCuadrado[5] + 1, coordCuadrado[6] + 1, coordCuadrado[7] + 1);
+            }
             //--------------------- */
         }
         else
