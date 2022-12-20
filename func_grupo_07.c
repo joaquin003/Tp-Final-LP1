@@ -41,17 +41,17 @@ void socketServidor(FILE *registro, int modoLocal)
 {
     int res, sendRes;
 
-    // INITIALIZATION ==============================
+    // INICIALIZACION ==============================
     WSADATA wsaData; // configuration data
     res = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     if (res)
     {
-        printf("Startup failed: %d\n", res);
+        printf("Inicio fallo: %d\n", res);
     }
     //==============================================
 
-    // SETUP SERVER =================================
+    // CONFIGURAR SERVER =================================
 
     // constructor socket
     SOCKET listener;
@@ -59,11 +59,11 @@ void socketServidor(FILE *registro, int modoLocal)
 
     if (listener == INVALID_SOCKET)
     {
-        printf("Error with construction: %d\n", WSAGetLastError());
+        printf("Error con constructor: %d\n", WSAGetLastError());
         WSACleanup();
     }
 
-    // bind to address
+    // unir a la direccion
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr(ADDRESS);
@@ -72,40 +72,40 @@ void socketServidor(FILE *registro, int modoLocal)
 
     if (res == SOCKET_ERROR)
     {
-        printf("Bind failed: %d\n", WSAGetLastError());
+        printf("Error al unir: %d\n", WSAGetLastError());
         closesocket(listener);
         WSACleanup();
     }
 
-    // set as a listener
+    // definir para escuchar
     res = listen(listener, SOMAXCONN);
     if (res == SOCKET_ERROR)
     {
-        printf("Listen failed: %d\n", WSAGetLastError());
+        printf("Error al escuchar: %d\n", WSAGetLastError());
         closesocket(listener);
         WSACleanup();
     }
     //==============================================
 
-    printf("Accepting on %s:%d\n", ADDRESS, PORT);
+    printf("Aceptando en %s:%d\n", ADDRESS, PORT);
 
     // HANDLE A CLIENT =============================
 
-    // accept client socket
+    // aceptar socket cliente
     SOCKET client;
     struct sockaddr_in clientAddr;
     int clientAddrlen;
     client = accept(listener, NULL, NULL);
     if (client == INVALID_SOCKET)
     {
-        printf("Could not accept: %d\n", WSAGetLastError());
+        printf("No se pudo aceptar: %d\n", WSAGetLastError());
         closesocket(listener);
         WSACleanup();
     }
 
     // get client information
     getpeername(client, (struct sockaddr *)&clientAddr, (socklen_t *)&clientAddr);
-    printf("Client connected at %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+    printf("Cliente conectado en %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
     // receive messages
     char recvbuf[BUFLEN];
@@ -126,12 +126,12 @@ void socketServidor(FILE *registro, int modoLocal)
         else if (!res)
         {
             // client disconnected
-            printf("Closing connection.\n");
+            printf("Cerrando conexion.\n");
             break;
         }
         else
         {
-            printf("Receive failed: %d\n", WSAGetLastError());
+            printf("Error al recibir: %d\n", WSAGetLastError());
             break;
         }
     } while (res > 0);
@@ -140,25 +140,23 @@ void socketServidor(FILE *registro, int modoLocal)
     res = shutdown(client, SD_BOTH);
     if (res == SOCKET_ERROR)
     {
-        printf("Client shutdown failed: %d\n", WSAGetLastError());
+        printf("Error al apagar cliente: %d\n", WSAGetLastError());
     }
     closesocket(client);
     // =============================================
 
-    // CLEANUP =====================================
+    // LIMPIEZA =====================================
 
-    // shut down server socket
+    // apagar socket servidor
     closesocket(listener);
 
-    // cleanup WSA
+    // limpiar WSA
     res = WSACleanup();
     if (res)
     {
-        printf("Cleanup failed: %d\n", res);
+        printf("Error al limpiar socket: %d\n", res);
     }
     //==============================================
-
-    printf("Shutting down. \nGood night.\n");
 }
 
 void horaActual(char *hora)
@@ -174,29 +172,29 @@ void socketCliente(FILE *registro, int modoLocal)
 {
     int res;
 
-    // INITIALIZATION ================================
+    // INICIALIZACION ================================
 
     WSADATA wsaData; // configuration data
     res = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (res)
     {
-        printf("Startup failed: %d\n", res);
+        printf("Error al iniciar: %d\n", res);
     }
 
     // ===============================================
 
-    // SETUP CLIENT SOCKET ===========================
+    // CONFIGURAR SOCKET CLIENTE ===========================
 
     // constructor socket
     SOCKET client;
     client = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (client == INVALID_SOCKET)
     {
-        printf("Error with construction: %d\n", WSAGetLastError());
+        printf("Error en constructor: %d\n", WSAGetLastError());
         WSACleanup();
     }
 
-    // connect to address
+    // conectar a direccion
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr(ADDRESS);
@@ -204,7 +202,7 @@ void socketCliente(FILE *registro, int modoLocal)
     res = connect(client, (struct sockaddr *)&address, sizeof(address));
     if (res == SOCKET_ERROR || client == INVALID_SOCKET)
     {
-        printf("Connect failed: %d\n", WSAGetLastError());
+        printf("Error al conectar: %d\n", WSAGetLastError());
         closesocket(client);
         WSACleanup();
     }
@@ -222,14 +220,14 @@ void socketCliente(FILE *registro, int modoLocal)
         enviarMensaje(&client, mensaje, registro, modoLocal);
     }
 
-    // set as running
+    // definimos la variable a true
     running = !0; // true
 
     // ===============================================
 
-    // MAIN LOOP =====================================
+    // LOOP PRINCIPAL =====================================
 
-    // receive loop
+    // loop de recibir
     char recvbuf[BUFLEN];
 
     do
@@ -246,12 +244,12 @@ void socketCliente(FILE *registro, int modoLocal)
         }
         else if (!res)
         {
-            printf("Connection closed.\n");
+            printf("Coneccion cerrada.\n");
             running = 0;
         }
         else
         {
-            printf("Receive failed: %d.\n", WSAGetLastError());
+            printf("Error al recibir: %d.\n", WSAGetLastError());
             running = 0;
         }
 
@@ -260,12 +258,12 @@ void socketCliente(FILE *registro, int modoLocal)
 
     // ===============================================
 
-    // CLEANUP =======================================
+    // LIMPIEZA =======================================
 
     res = shutdown(client, SD_BOTH);
     if (res == SOCKET_ERROR)
     {
-        printf("Shutdown failed: %d\n", WSAGetLastError());
+        printf("Error al apagar: %d\n", WSAGetLastError());
         closesocket(client);
         WSACleanup();
     }
