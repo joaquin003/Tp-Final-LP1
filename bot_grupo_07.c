@@ -158,7 +158,7 @@ int main()
             printf("\nAntes de comenzar la partida usted debe hacer: \n");
             printf("1) Elegir si va a jugar como Local o Visitante \n");
             printf("Para cambiar esos valores vaya a Configuracion de parametros \n");
-            printf("2) Indicar la ruta para el registro\n");
+            printf("2) Indicar la ruta para el registro...(la ruta no debe tener espacios)\n");
             printf("Para cambiar esos valores vaya a Configuracion de parametros \n\n");
             printf("Para comenzar la partida seleccione Empezar partida luego de completar los pasos anteriores\n\n");
             system("pause");
