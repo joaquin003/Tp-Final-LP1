@@ -289,7 +289,6 @@ int inferiorDerecho(int A[10][10], int x, int y, int buscar)
 {
     int seFormaCuadrado = 0;
     int index = 1;
-
     // ciclo para buscar las posiciones de cuadrados
     while (index < 10)
     {
@@ -320,7 +319,6 @@ int superiorDerecho(int A[10][10], int x, int y, int buscar)
 {
     int seFormaCuadrado = 0;
     int index = 1;
-
     // ciclo para buscar las posiciones de cuadrados
     while (index < 10)
     {
@@ -380,7 +378,6 @@ int superiorIzquierdo(int A[10][10], int x, int y, int buscar)
 {
     int seFormaCuadrado = 0;
     int index = 1;
-
     // ciclo para buscar las posiciones de cuadrados
     while (index < 10)
     {
@@ -403,12 +400,10 @@ int superiorIzquierdo(int A[10][10], int x, int y, int buscar)
         }
         index++;
     }
-
     return seFormaCuadrado;
 }
 
-// para los cuadradros inclinadas
-int conOrientacion(int A[10][10], int x, int y, int buscar)
+int conOrientacion(int A[10][10], int x, int y, int buscar) // para los cuadradros inclinadas
 {
     int seFormaCuadrado = 0;
     int indexF = 1;
@@ -539,7 +534,6 @@ int seFormoCuadrado(int A[10][10], int buscar)
             int posicionFila = i;
             int posicionCol = j;
             int resultado = 0;
-
             // hay que validar que la posicion tenga el elemento a buscar
             if (A[i][j] == buscar)
             {
@@ -554,7 +548,6 @@ int seFormoCuadrado(int A[10][10], int buscar)
             }
         }
     }
-
     return seFormoCuadrado;
 }
 
@@ -697,19 +690,15 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             // Separamos el mensaje de acuerdo al valor de j
             if (j == 0) // id mensaje
             {
-                printf("Token: %s\n", token);
-                // agregamos el valor al archivo
                 fprintf(registro, "Mensaje-id:%s", token);
             }
             else if (j == 1) // marca temporal
             {
-                printf("Token: %s\n", token);
                 fprintf(registro, "     Marca-de-tiempo:%s. ", token);
                 strcpy(tiempoEnviado, token);
             }
             else if (j == 2) // duracion
             {
-                printf("Token: %s\n", token);
                 fprintf(registro, "      Duracion:%s", token);
                 duracionEnviado = atoi(token);
                 if (duracionEnviado > 6)
@@ -720,24 +709,20 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             }
             else if (j == 3) // programa
             {
-                printf("Token: %s\n", token);
                 strcpy(programaEnviado, token);
             }
             else if (j == 4) // origen
             {
-                printf("Token origen: %s\n", token);
                 fprintf(registro, "      Mensaje-origen:%s.", token);
                 strcpy(origenEnviado, token);
             }
             else if (j == 5) // destino
             {
-                printf("Token destino: %s\n", token);
                 fprintf(registro, "      Mensaje-destino:%s.\n", token);
                 strcpy(destinoEnviado, token);
             }
             else if (j == 6) // evento
             {
-                printf("Token evento: %s\n", token);
                 fprintf(registro, "Evento:%s.", token);
                 if (strcmp(token, "jugar") == 0)
                 {
@@ -747,13 +732,11 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             }
             else if (j == 7) // estado
             {
-                printf("Token estado: %s\n", token);
                 fprintf(registro, "      Estado-juego:%s.\n", token);
                 strcpy(estadoEnviado, token);
             }
             else if (j == 8) // jugada
             {
-                printf("Token jugada: %s\n", token);
                 jugadas = token;
                 if (strcmp(token, "1") == 0)
                 {
@@ -762,7 +745,6 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             }
             else if (j == 9) // turno
             {
-                printf("Token: %s\n", token);
                 fprintf(registro, "------------Turno-jugador:Jugador-%s. ", token);
                 fprintf(registro, "Numero-jugada:%s.------------\n", jugadas);
             }
@@ -772,7 +754,6 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
             }
             else if (j == 11) // posicion en y
             {
-                printf("Token: %s\n", token);
                 fprintf(registro, "Casilla-jugada:(%s,%s).\n", aux, token);
             }
             else if (j == 12) // TABLERO!!!!!!!!
@@ -787,7 +768,6 @@ DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro,
                 }
                 int cont = 0, // contador que hace los saltos de linea
                     k = 0;    // contador de caracteres dentro del tablero
-                printf("Token: %s\n", token);
                 strcpy(tableroNuestro, token);
                 /// guardamos el tablero en el archivo con el formato deseado
                 while (k < strlen(token) && strlen(token) > 1) // mientas no leamos todo el tablero
@@ -1031,7 +1011,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     char xEnviar[20];
     char yEnviar[20];
     char tableroEnviar[300];
-
+    srand(getpid());
     strcpy(origenEnviar, "7;");
     if (modoLocal)
     {
@@ -1052,15 +1032,11 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
     {
         while (token != NULL)
         {
-            /*
-            Separamos el mensaje de acuerdo al valor de j
-            */
+            // Separamos el mensaje de acuerdo al valor de j
             if (j == 0) // id mensaje
             {
-                printf("Token: %s\n", token);
                 // agregamos el valor al archivo
                 fprintf(registro, "Mensaje-id:%s", token);
-
                 // cambiamos el valor para concatenar al mensaje de respuesta
                 int x = atoi(token);
                 itoa(x + 1, nuevoId, 10); // convertimos el nuevo id a string
@@ -1068,54 +1044,39 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             else if (j == 1) // marca temporal
             {
-                printf("Token: %s\n", token);
                 strcpy(tiempRecibidoStr, token);
                 tiempoRecibido = marcaServidor(token);
                 fprintf(registro, "     Marca-de-tiempo:%s. ", token);
             }
             else if (j == 2) // duracion
             {
-                printf("Token: %s\n", token);
                 fprintf(registro, "      Duracion:%s", token);
                 duracionRecibido = atoi(token);
                 fprintf(registro, "\nMensaje-tipo: recibido.");
             }
-            else if (j == 3) // programa
-            {
-                printf("Token: %s\n", token);
-            }
             else if (j == 4) // origen
             {
-                printf("Token origen: %s\n", token);
                 fprintf(registro, "     Mensaje-origen:%s. ", token);
-
                 strcpy(destinoEnviar, token);
                 strcat(destinoEnviar, ";");
             }
             else if (j == 5) // destino
             {
-                printf("Token destino: %s\n", token);
                 fprintf(registro, "     Mensaje-destino:%s.\n", token);
             }
             else if (j == 6) // evento
             {
-                printf("Token evento: %s\n", token);
                 fprintf(registro, "Evento:%s.", token);
-
                 strcpy(eventoRecibido, token);
             }
             else if (j == 7) // estado
             {
-                printf("Token estado: %s\n", token);
                 fprintf(registro, "     Estado-juego:%s.\n", token);
-
                 strcpy(estadoRecibido, token);
             }
             else if (j == 8) // jugada
             {
-                printf("Token jugada: %s\n", token);
                 jugadas = token;
-
                 if (strcmp(token, "*") != 0)
                 {
                     // cambiamos el valor para concatenar al mensaje de respuesta
@@ -1131,7 +1092,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             else if (j == 9) // turno
             {
-                printf("Token: %s\n", token);
                 fprintf(registro, "------------Turno-jugador:Jugador-%s. ", token);
                 fprintf(registro, "Numero-jugada:%s.------------\n", jugadas);
             }
@@ -1142,7 +1102,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
             }
             else if (j == 11) // posicion en y
             {
-                printf("Token: %s\n", token);
                 strcpy(yRecibido, token);
                 fprintf(registro, "Casilla-jugada:(%s,%s).\n", aux, token);
             }
@@ -1159,7 +1118,7 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
                 strcpy(tableroRecibido, token);
                 int cont = 0, // contador que hace los saltos de linea
                     k = 0;    // contador de caracteres dentro del tablero
-                printf("Token: %s\n", token);
+
                 /// guardamos el tablero en el archivo con el formato deseado
                 while (k < strlen(token) && strlen(token) > 1) // mientas no leamos todo el tablero
                 {
@@ -1375,7 +1334,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         int fila = 0, columna = 0, p = 0, contador = 1;
         char auxi[1];
         int matriz[10][10];
-        printf("\n soy %s\n", tableroRecibido);
         while (p < strlen(tableroRecibido))
         {
             if (contador % 10 == 0) // para hacer el cambio de fila
@@ -1542,8 +1500,6 @@ void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal
         }
         else if (seFormo_contrario)
         {
-            printf("\nperdio contrario\n");
-
             // hora en que vamos a enviar el mensaje
             char hora[100];
             horaActual(hora);

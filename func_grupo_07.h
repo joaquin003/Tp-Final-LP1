@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <unistd.h>
 #pragma comment(lib, "Ws2_32.lib")
 
 #define BUFLEN 1000
