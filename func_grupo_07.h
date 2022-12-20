@@ -42,6 +42,7 @@ void horaActual(char *hora);
 void socketCliente(FILE *registro, int modoLocal);
 int seFormoCuadrado(int A[10][10], int buscar);
 int cantVacias(int A[10][10]);
+void verificarMatrices(int matrizOriginal[10][10], int matrizNueva[10][10], int posFila, int posCol);
 DWORD WINAPI enviarMensaje(LPVOID lpParam, char mensaje[BUFLEN], FILE *registro, int modoLocal);
 void leer_mensaje(FILE *registro, char mensaje[], char *respuesta, int modoLocal);
 int marcaServidor(char *tiempo);
